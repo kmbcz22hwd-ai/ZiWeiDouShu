@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫微斗數｜完整命盤</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+:root{
+  --ink:#12100a;--bg:#f0ebe0;--gold:#b8923a;--gold-lt:#e8d5a0;--gold-pale:#faf6eb;
+  --jade:#2a5e50;--jade-lt:#e4f0ec;--rust:#7d3520;--mist:#6b7280;--border:#d6c99a;--card:#fffdf6;
+  --purple:#5a3d7a;--purple-lt:#ece4f2;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+header{background:var(--ink);padding:18px 20px;display:flex;align-items:center;gap:12px;}
+.logo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;width:36px;height:36px;padding:4px;border:1.5px solid var(--gold);}
+.logo span{background:var(--gold);opacity:.5;}
+.logo span:nth-child(5){opacity:1;}
+header h1{font-family:'Noto Serif TC',serif;color:var(--gold);font-size:1.05rem;letter-spacing:.1em;}
+header p{color:rgba(255,255,255,.4);font-size:.68rem;margin-top:2px;}
+.tab-bar{background:var(--ink);display:flex;border-top:1px solid rgba(255,255,255,.08);}
+.nav-a{flex:1;text-align:center;padding:10px;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:2px solid transparent;font-size:.85rem;}
+.nav-a.on{color:var(--gold);border-bottom-color:var(--gold);}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--purple));}
+.card-title{font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:14px;letter-spacing:.06em;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.field label{display:block;font-size:.72rem;color:var(--mist);margin-bottom:4px;}
+.field select,.field input{width:100%;border:1px solid var(--border);background:var(--bg);padding:9px 10px;font-family:'Noto Sans TC',sans-serif;font-size:.88rem;color:var(--ink);border-radius:4px;outline:none;}
+.field select:focus,.field input:focus{border-color:var(--gold);}
+.btn{width:100%;padding:13px;background:var(--ink);color:var(--gold);border:none;border-radius:4px;font-family:'Noto Serif TC',serif;font-size:1rem;font-weight:700;letter-spacing:.1em;cursor:pointer;margin-top:10px;}
+.btn:hover{background:#2d2010;}
+.palace-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,auto);gap:3px;margin-bottom:16px;background:var(--border);border:2px solid var(--border);border-radius:4px;overflow:hidden;}
+.p-cell{background:var(--card);padding:6px;min-height:88px;position:relative;font-size:.68rem;}
+.p-cell.center{grid-column:2/4;grid-row:2/4;background:var(--purple-lt);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px;}
+.p-cell .pc-zhi{position:absolute;top:3px;right:5px;font-size:.6rem;color:var(--mist);}
+.p-cell .pc-name{font-weight:700;color:var(--purple);font-size:.72rem;margin-bottom:3px;}
+.p-cell.self .pc-name{color:var(--rust);}
+.p-cell.self{background:#fff3ee;}
+.p-cell .pc-stars{line-height:1.5;}
+.pc-star{display:inline-block;margin-right:3px;}
+.pc-star.main{color:var(--gold);font-weight:700;}
+.pc-star.lucky{color:var(--jade);}
+.page-nav{display:flex;overflow-x:auto;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px;}
+.pnav-btn{flex-shrink:0;padding:7px 12px;border:none;background:transparent;border-radius:4px;font-size:.75rem;cursor:pointer;color:var(--mist);font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
+.pnav-btn.on{background:var(--ink);color:var(--gold);font-weight:700;}
+.page{display:none;}.page.on{display:block;}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:18px;margin-bottom:12px;}
+.sec-head{font-family:'Noto Serif TC',serif;font-size:.9rem;font-weight:700;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-icon{width:22px;height:22px;background:var(--purple);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;}
+.sec-body{font-size:.86rem;line-height:1.95;color:#2a200e;}
+.sec-body p{margin-bottom:8px;}
+.hl{font-weight:700;color:var(--purple);}
+.warn{font-weight:700;color:var(--rust);}
+.gold{font-weight:700;color:var(--gold);}
+.tip{background:var(--purple-lt);border-left:3px solid var(--purple);padding:10px 14px;border-radius:0 4px 4px 0;margin-top:10px;font-size:.84rem;line-height:1.8;}
+.export-bar{background:var(--ink);border-radius:6px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.export-bar p{color:rgba(255,255,255,.6);font-size:.82rem;}
+.ebtn{background:var(--gold);color:var(--ink);border:none;padding:9px 16px;border-radius:4px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.daxian-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:10px 0;}
+.daxian-item{flex-shrink:0;width:76px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px 4px;text-align:center;}
+.daxian-item.current{border-color:var(--gold);background:var(--gold-pale);}
+.daxian-item .dx-age{font-size:.64rem;color:var(--mist);margin-bottom:4px;}
+.daxian-item .dx-name{font-family:'Noto Serif TC',serif;font-size:.85rem;font-weight:700;color:var(--purple);}
+@media(max-width:480px){
+  .row2,.row3,.row4{grid-template-columns:1fr 1fr;}
+  .p-cell{min-height:76px;font-size:.62rem;padding:4px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div><h1>紫微斗數系統</h1><p>命盤 ✦ 十二宮 ✦ 四化 ✦ 大限 ✦ 流年</p></div>
+</header>
+<div class="tab-bar">
+  <a onclick="goNav('analyze',this)" class="nav-a on">📋 命盤解析</a>
+  <a onclick="goNav('crm',this)" class="nav-a">👤 客戶管理</a>
+</div>
+<div class="wrap">
+
+<div id="analyze-view">
+<div class="card" id="input-card">
+  <div class="card-title">輸入命主資料</div>
+  <div class="row2">
+    <div class="field"><label>姓名</label><input type="text" id="f-name" placeholder="輸入姓名"></div>
+    <div class="field"><label>性別</label>
+      <select id="f-gender"><option value="female">女命</option><option value="male">男命</option></select>
+    </div>
+  </div>
+  <div class="row4">
+    <div class="field"><label>出生年（國曆）</label>
+      <select id="f-year"><option value="">請選擇</option></select>
+    </div>
+    <div class="field"><label>出生月</label>
+      <select id="f-month"><option value="">請選擇</option>
+        <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option>
+        <option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option>
+        <option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+      </select>
+    </div>
+    <div class="field"><label>出生日</label>
+      <select id="f-day"><option value="">請選擇</option></select>
+    </div>
+    <div class="field"><label>出生時辰</label>
+      <select id="f-hour">
+        <option value="0">子時 23-01</option><option value="1">丑時 01-03</option>
+        <option value="2">寅時 03-05</option><option value="3">卯時 05-07</option>
+        <option value="4">辰時 07-09</option><option value="5">巳時 09-11</option>
+        <option value="6">午時 11-13</option><option value="7">未時 13-15</option>
+        <option value="8">申時 15-17</option><option value="9">酉時 17-19</option>
+        <option value="10">戌時 19-21</option><option value="11">亥時 21-23</option>
+      </select>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>感情狀態</label>
+      <select id="f-status"><option value="單身">單身</option><option value="交往中">交往中</option><option value="已婚">已婚</option><option value="離婚/分手後">離婚/分手後</option></select>
+    </div>
+    <div class="field"><label>解析年度</label>
+      <select id="f-anal-year"></select>
+    </div>
+  </div>
+  <p style="font-size:.75rem;color:var(--mist);margin-top:4px">※ 紫微斗數需要準確的出生時辰才能精確排盤，若不確定請儘量提供，誤差可能影響命宮判定。</p>
+  <button class="btn" onclick="runZiwei()">✦ 起紫微命盤</button>
+</div>
+
+<div id="result" style="display:none">
+  <div class="export-bar">
+    <p id="r-title">紫微斗數命盤報告</p>
+    <div style="display:flex;gap:8px">
+      <button class="ebtn" onclick="copyCurrentPage()">📋 複製本頁</button>
+      <button class="ebtn" onclick="copyAll()">📋 複製全部</button>
+      <button class="ebtn" onclick="window.print()">🖨 列印</button>
+    </div>
+  </div>
+  <div class="page-nav" id="page-nav"></div>
+  <div id="pages-container"></div>
+</div>
+<div id="copy-buf" style="display:none;white-space:pre-wrap"></div>
+</div>
+
+<div id="crm-view" style="display:none">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:0">客戶管理</div>
+      <button onclick="openAddClient()" style="background:var(--jade);color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:.85rem;">＋ 新增客戶</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--mist);margin-bottom:14px;">與靈數、八字命盤系統共用同一份客戶資料</p>
+    <div id="client-list"></div>
+  </div>
+</div>
+
+<div id="client-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:8px;padding:24px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;">
+    <h2 id="modal-title" style="font-family:'Noto Serif TC',serif;font-size:1rem;font-weight:700;margin-bottom:16px;">新增客戶</h2>
+    <div class="row2">
+      <div class="field"><label>姓名</label><input type="text" id="c-name"></div>
+      <div class="field"><label>電話</label><input type="text" id="c-phone" placeholder="0912..."></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>出生年</label><input type="number" id="c-year" placeholder="1985"></div>
+      <div class="field"><label>出生月</label><input type="number" id="c-month" placeholder="6" min="1" max="12"></div>
+      <div class="field"><label>出生日</label><input type="number" id="c-day" placeholder="14" min="1" max="31"></div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="field"><label>備注</label><input type="text" id="c-note" placeholder="過敏、偏好、注意事項…"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button onclick="closeModal()" style="padding:9px 20px;border-radius:4px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:.85rem;">取消</button>
+      <button onclick="saveClient()" style="padding:9px 20px;border-radius:4px;border:none;background:var(--jade);color:#fff;cursor:pointer;font-size:.85rem;font-weight:700;">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var lunarInfo=[0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+0x06ca0,0x0b550,0x15355,0x04da0,0x0a5d0,0x14573,0x052d0,0x0a9a8,0x0e950,0x06aa0,
+0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b5a0,0x195a6,
+0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
+0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0];
+
+function lYearDays(y){
+  var sum=348;
+  for(var i=0x8000;i>0x8;i>>=1) sum+=(lunarInfo[y-1900]&i)?1:0;
+  return sum+leapDays(y);
+}
+function leapMonth(y){ return lunarInfo[y-1900]&0xf; }
+function leapDays(y){
+  if(leapMonth(y)) return (lunarInfo[y-1900]&0x10000)?30:29;
+  return 0;
+}
+function monthDays(y,m){
+  return (lunarInfo[y-1900]&(0x10000>>m))?30:29;
+}
+function solar2lunar(sy,sm,sd){
+  var baseDate=new Date(1900,0,31);
+  var objDate=new Date(sy,sm-1,sd);
+  var offset=Math.floor((objDate-baseDate)/86400000);
+  var lY=1900,daysInYear;
+  for(lY=1900; lY<2050 && offset>0; lY++){
+    daysInYear=lYearDays(lY);
+    if(offset<daysInYear) break;
+    offset-=daysInYear;
+  }
+  var leap=leapMonth(lY);
+  var isLeap=false;
+  var lM=1,daysInMonth;
+  for(lM=1; lM<=13 && offset>0; lM++){
+    if(leap>0 && lM===(leap+1) && !isLeap){
+      lM--; isLeap=true; daysInMonth=leapDays(lY);
+    } else {
+      daysInMonth=monthDays(lY,lM);
+    }
+    if(offset<daysInMonth) break;
+    offset-=daysInMonth;
+    if(isLeap && lM===(leap+1)) isLeap=false;
+  }
+  var lD=offset+1;
+  return {year:lY, month:lM, day:lD, isLeap:isLeap};
+}
+
+var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var ANIMAL=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
+var PALACE_NAMES=['命宮','兄弟','夫妻','子女','財帛','疾厄','遷移','交友','官祿','田宅','福德','父母'];
+
+function getYearGanZhi(y){
+  var g=(y-4)%10; if(g<0)g+=10;
+  var z=(y-4)%12; if(z<0)z+=12;
+  return {gan:g, zhi:z};
+}
+
+function getMingGong(lunarMonth, hourIdx){
+  var start=(2+lunarMonth-1)%12;
+  var mg=((start - hourIdx)%12+12)%12;
+  return mg;
+}
+function getShenGong(lunarMonth, hourIdx){
+  var start=(2+lunarMonth-1)%12;
+  var sg=((start + hourIdx)%12+12)%12;
+  return sg;
+}
+
+function getMingGongGan(yearGanIdx, mingGongZhiIdx){
+  var startGan=[2,4,6,8,0][yearGanIdx%5];
+  var offset=(mingGongZhiIdx-2+12)%12;
+  return (startGan+offset)%10;
+}
+
+var NAYIN={
+  '甲子':'金','乙丑':'金','丙寅':'火','丁卯':'火','戊辰':'木','己巳':'木','庚午':'土','辛未':'土','壬申':'金','癸酉':'金',
+  '甲戌':'火','乙亥':'火','丙子':'水','丁丑':'水','戊寅':'土','己卯':'土','庚辰':'金','辛巳':'金','壬午':'木','癸未':'木',
+  '甲申':'水','乙酉':'水','丙戌':'土','丁亥':'土','戊子':'火','己丑':'火','庚寅':'木','辛卯':'木','壬辰':'水','癸巳':'水',
+  '甲午':'金','乙未':'金','丙申':'火','丁酉':'火','戊戌':'木','己亥':'木','庚子':'土','辛丑':'土','壬寅':'金','癸卯':'金',
+  '甲辰':'火','乙巳':'火','丙午':'水','丁未':'水','戊申':'土','己酉':'土','庚戌':'金','辛亥':'金','壬子':'木','癸丑':'木',
+  '甲寅':'水','乙卯':'水','丙辰':'土','丁巳':'土','戊午':'火','己未':'火','庚申':'木','辛酉':'木','壬戌':'水','癸亥':'水'
+};
+var WUXINGJU={'水':2,'木':3,'金':4,'土':5,'火':6};
+
+function getWuxingJu(yearGanIdx, mingGongZhiIdx){
+  var mgGanIdx=getMingGongGan(yearGanIdx, mingGongZhiIdx);
+  var ganzhi=GAN[mgGanIdx]+ZHI[mingGongZhiIdx];
+  var wx=NAYIN[ganzhi]||'土';
+  return {ju:WUXINGJU[wx], wx:wx, ganzhi:ganzhi};
+}
+
+function getZiweiPos(ju, lunarDay){
+  var n=lunarDay, j=ju;
+  var full=Math.ceil(n/j)*j;
+  var borrow=full-n;
+  var shang=full/j;
+  var zwIdx=(shang-1)%12;
+  if(borrow>0){
+    if(borrow%2===0){ zwIdx=(zwIdx+borrow)%12; }
+    else { zwIdx=((zwIdx-borrow)%12+12)%12; }
+  }
+  return zwIdx;
+}
+function ziweiToZhiIdx(zwIdxFromYin){ return (2+zwIdxFromYin)%12; }
+
+var ZIWEI_OFFSETS={'紫微':0,'天機':-1,'太陽':-3,'武曲':-4,'天同':-5,'廉貞':-8};
+var TIANFU_OFFSETS={'天府':0,'太陰':1,'貪狼':2,'巨門':3,'天相':4,'天梁':5,'七殺':6,'破軍':10};
+
+function getTianfuZhiIdx(ziweiZhiIdx){
+  var map={0:8,1:7,2:6,3:5,4:4,5:3,6:2,7:1,8:0,9:11,10:10,11:9};
+  var zwFromYin=(ziweiZhiIdx-2+12)%12;
+  var tfFromYin=map[zwFromYin];
+  return (2+tfFromYin)%12;
+}
+
+function placeMainStars(ziweiZhiIdx){
+  var stars={};
+  Object.keys(ZIWEI_OFFSETS).forEach(function(name){
+    stars[name]=((ziweiZhiIdx+ZIWEI_OFFSETS[name])%12+12)%12;
+  });
+  var tianfuZhiIdx=getTianfuZhiIdx(ziweiZhiIdx);
+  Object.keys(TIANFU_OFFSETS).forEach(function(name){
+    stars[name]=(tianfuZhiIdx+TIANFU_OFFSETS[name])%12;
+  });
+  return stars;
+}
+
+function placeAuxStars(yearGanIdx, yearZhiIdx, lunarMonth, hourIdx){
+  var aux={};
+  aux['左輔']=(4+lunarMonth-1)%12;
+  aux['右弼']=((10-lunarMonth+1)%12+12)%12;
+  aux['文昌']=((10-hourIdx)%12+12)%12;
+  aux['文曲']=(4+hourIdx)%12;
+  var lucunMap=[2,3,5,6,5,6,8,9,11,0];
+  aux['祿存']=lucunMap[yearGanIdx];
+  aux['擎羊']=(aux['祿存']+1)%12;
+  aux['陀羅']=((aux['祿存']-1)%12+12)%12;
+  var kuiMap=[1,0,11,11,1,0,7,7,3,3]; var yueMap=[7,8,9,9,7,8,1,1,5,5];
+  aux['天魁']=kuiMap[yearGanIdx];
+  aux['天鉞']=yueMap[yearGanIdx];
+  var huoMap={0:2,1:2,2:2,3:10,4:10,5:10,6:1,7:1,8:1,9:9,10:9,11:9};
+  aux['火星']=huoMap[yearZhiIdx];
+  aux['鈴星']=(huoMap[yearZhiIdx]+2)%12;
+  return aux;
+}
+
+var SIHUA_TABLE={
+  0:{'祿':'廉貞','權':'破軍','科':'武曲','忌':'太陽'},
+  1:{'祿':'天機','權':'天梁','科':'紫微','忌':'太陰'},
+  2:{'祿':'天同','權':'天機','科':'文昌','忌':'廉貞'},
+  3:{'祿':'太陰','權':'天同','科':'天機','忌':'巨門'},
+  4:{'祿':'貪狼','權':'太陰','科':'右弼','忌':'天機'},
+  5:{'祿':'武曲','權':'貪狼','科':'天梁','忌':'文曲'},
+  6:{'祿':'太陽','權':'武曲','科':'太陰','忌':'天同'},
+  7:{'祿':'巨門','權':'太陽','科':'文曲','忌':'文昌'},
+  8:{'祿':'天梁','權':'紫微','科':'左輔','忌':'武曲'},
+  9:{'祿':'破軍','權':'巨門','科':'太陰','忌':'貪狼'}
+};
+
+function getPalaceZhi(mingGongZhiIdx, palaceIdx){
+  return ((mingGongZhiIdx - palaceIdx)%12+12)%12;
+}
+
+var ZW=null;
+
+function runZiwei(){
+  var name=document.getElementById('f-name').value.trim()||'命主';
+  var gender=document.getElementById('f-gender').value;
+  var y=parseInt(document.getElementById('f-year').value);
+  var m=parseInt(document.getElementById('f-month').value);
+  var d=parseInt(document.getElementById('f-day').value);
+  var hourIdx=parseInt(document.getElementById('f-hour').value);
+  var status=document.getElementById('f-status').value;
+  var analYear=parseInt(document.getElementById('f-anal-year').value);
+
+  if(!y||!m||!d){alert('請選擇完整的出生年月日');return;}
+
+  var lunar=solar2lunar(y,m,d);
+  var yg=getYearGanZhi(y);
+  var mingGongZhi=getMingGong(lunar.month, hourIdx);
+  var shenGongZhi=getShenGong(lunar.month, hourIdx);
+  var juInfo=getWuxingJu(yg.gan, mingGongZhi);
+  var zwFromYin=getZiweiPos(juInfo.ju, lunar.day);
+  var ziweiZhi=ziweiToZhiIdx(zwFromYin);
+  var mainStars=placeMainStars(ziweiZhi);
+  var auxStars=placeAuxStars(yg.gan, yg.zhi, lunar.month, hourIdx);
+  var sihua=SIHUA_TABLE[yg.gan];
+
+  var mingZhuMap=['貪狼','巨門','祿存','文曲','廉貞','武曲','破軍','武曲','廉貞','文曲','祿存','巨門'];
+  var shenZhuMap=['火星','天相','天梁','天同','文昌','天機','火星','天相','天梁','天同','文昌','天機'];
+  var mingZhu=mingZhuMap[mingGongZhi];
+  var shenZhu=shenZhuMap[shenGongZhi];
+
+  var yangYear=(yg.gan%2===0);
+  var isMale=(gender==='male');
+  var shunxing=(yangYear&&isMale)||(!yangYear&&!isMale);
+  var daxians=[];
+  for(var i=0;i<12;i++){
+    var pZhi=shunxing?(mingGongZhi+i)%12:((mingGongZhi-i)%12+12)%12;
+    var startAge=juInfo.ju+i*10;
+    if(startAge>95) break; // 只保留合理人生跨度內的大限
+    daxians.push({zhiIdx:pZhi, startAge:startAge, endAge:startAge+9, palaceIdx:i});
+  }
+
+  ZW={
+    name:name,gender:gender,y:y,m:m,d:d,hourIdx:hourIdx,status:status,analYear:analYear,
+    lunar:lunar,yearGan:yg.gan,yearZhi:yg.zhi,
+    mingGongZhi:mingGongZhi,shenGongZhi:shenGongZhi,
+    ju:juInfo.ju,juWx:juInfo.wx,
+    ziweiZhi:ziweiZhi,mainStars:mainStars,auxStars:auxStars,sihua:sihua,
+    mingZhu:mingZhu,shenZhu:shenZhu,shunxing:shunxing,daxians:daxians
+  };
+
+  document.getElementById('r-title').textContent=name+'｜'+y+'/'+m+'/'+d+' 紫微斗數命盤';
+  buildPages();
+  document.getElementById('result').style.display='';
+  document.getElementById('input-card').style.display='none';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+var PAGE_DEFS=[
+  {id:'p1',label:'命盤總覽'},
+  {id:'p2',label:'命宮主星'},
+  {id:'p3',label:'四化分析'},
+  {id:'p4',label:'性格特質'},
+  {id:'p5',label:'感情婚姻'},
+  {id:'p6',label:'財帛宮'},
+  {id:'p7',label:'事業官祿'},
+  {id:'p8',label:'疾厄宮'},
+  {id:'p9',label:'遷移交友'},
+  {id:'p10',label:'田宅福德'},
+  {id:'p11',label:'父母子女'},
+  {id:'p12',label:'大限流年'},
+  {id:'p13',label:'綜合建議'}
+];
+
+function buildPages(){
+  var nav=document.getElementById('page-nav');
+  nav.innerHTML='';
+  PAGE_DEFS.forEach(function(p,i){
+    var b=document.createElement('button');
+    b.className='pnav-btn'+(i===0?' on':'');
+    b.textContent=p.label;
+    b.setAttribute('onclick','goPage("'+p.id+'",this)');
+    nav.appendChild(b);
+  });
+  var allHtml='';
+  PAGE_DEFS.forEach(function(p,i){
+    allHtml+='<div id="'+p.id+'" class="page'+(i===0?' on':'')+'">'+genPage(p.id)+'</div>';
+  });
+  document.getElementById('pages-container').innerHTML=allHtml;
+}
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.pnav-btn').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  el.classList.add('on');
+}
+
+var STAR_INFO={
+  '紫微':{trait:'帝王之星，天生具有領導氣質和貴氣，喜歡受人尊重，不容易屈居人下。個性上有一種天生的自信，但也可能顯得高傲或難以親近。',love:'在感情中也習慣主導，需要一個懂得欣賞你、給你面子的伴侶。',career:'適合管理、領導、需要決策權的位置。',health:'注意脾胃與循環系統。'},
+  '天機':{trait:'聰明機智，善於謀略分析，思維轉得很快，常常是眾人中最先看出問題核心的人。但也容易想太多、心思不定。',love:'感情中重視精神交流，需要能和你深度對話的伴侶。',career:'適合軍師、顧問、策略規劃類工作。',health:'注意神經系統與肝膽。'},
+  '太陽':{trait:'熱情、光明、樂於付出，像太陽一樣照亮身邊的人。個性直率，不喜歡陰暗算計，但有時候太過操心他人的事，忽略自己。',love:'感情中主動付出，容易為對方奉獻一切，需要學會平衡付出與被愛。',career:'適合公眾事業、需要影響力的工作。',health:'注意眼睛與心血管系統。'},
+  '武曲':{trait:'剛毅果決，重視實際，是天生的行動派和理財高手。個性有點硬，不擅長甜言蜜語，但做事說到做到，值得信賴。',love:'感情表達較含蓄，習慣用行動證明，需要伴侶懂得你的沉默。',career:'適合金融、財務、需要決斷力的工作。',health:'注意呼吸系統與肺部。'},
+  '天同':{trait:'溫和、隨性、享受生活，是十四主星中最溫柔的星曜。個性隨和，不喜歡競爭，容易滿足，但有時候也容易缺乏鬥志。',love:'感情運通常不錯，容易遇到疼愛你的人，但需要避免過度依賴。',career:'適合服務業、需要親和力的工作。',health:'注意消化系統與內分泌。'},
+  '廉貞':{trait:'多變、有魅力，是次桃花星，也帶有一定的鋒芒和爭議性。個性複雜多面，有時溫和有時強勢，情緒起伏較大。',love:'感情較為複雜多變，桃花不少，需要學會專一和穩定。',career:'適合創意、公關、需要應變能力的工作。',health:'注意心血管與血液系統。'},
+  '天府':{trait:'穩重、包容、善於理財，是天生的守成者和管理者。個性穩定可靠，有一種讓人安心的氣場，但有時候也顯得保守。',love:'感情中扮演照顧者的角色，是值得依靠的伴侶。',career:'適合管理、財務、行政類工作。',health:'注意脾胃消化系統。'},
+  '太陰':{trait:'細膩、感性、內斂含蓄，是十四主星中最溫柔體貼的星曜之一。個性溫和內向，重視情感層面，容易替他人著想。',love:'感情豐富細膩，容易多愁善感，需要一個懂得你心思的伴侶。',career:'適合藝術、美容、需要細心的工作。',health:'注意婦科與情緒相關疾病。'},
+  '貪狼':{trait:'多才多藝，慾望強烈，是第一大桃花星，充滿魅力與吸引力。個性活潑善於交際，興趣廣泛，但有時候容易見異思遷。',love:'桃花極旺，感情經歷可能較豐富，需要學會定下心來。',career:'適合業務、演藝、需要交際手腕的工作。',health:'注意肝腎與泌尿系統。'},
+  '巨門':{trait:'口才好，善於分析辯論，也容易招惹是非。個性直言不諱，觀察力敏銳，但說話有時候太直接容易得罪人。',love:'感情中溝通很重要，容易因言語產生誤會，需要多留意說話方式。',career:'適合法律、教育、傳播類工作。',health:'注意口腔與消化系統。'},
+  '天相':{trait:'溫和、忠誠、有服務精神，是天生的輔佐之才，樂於幫助他人。個性隨和低調，重視和諧，但有時候缺乏主見。',love:'感情中是忠誠的伴侶，重視承諾與穩定。',career:'適合輔佐、幕僚、服務類工作。',health:'注意皮膚與泌尿系統。'},
+  '天梁':{trait:'穩重、有長者風範，善於照顧他人，也帶有一定的宗教或哲學傾向。個性正直，樂於指導他人，但有時候顯得說教。',love:'感情中扮演長輩或導師的角色，需要對方尊重你的建議。',career:'適合醫療、宗教、教育類工作。',health:'注意呼吸系統與腸胃。'},
+  '七殺':{trait:'剛強果斷，衝勁十足，是天生的開創者和戰士。個性強勢獨立，不畏挑戰，但有時候過於剛硬，容易與人衝突。',love:'感情直接明快，不喜歡拖泥帶水，需要對等而非依附的伴侶。',career:'適合開創型、需要衝勁的工作。',health:'注意外傷與心血管系統。'},
+  '破軍':{trait:'變動、革新、敢於打破常規，是天生的改革者。個性獨立叛逆，不喜歡被約束，人生波動較大，但也因此充滿突破的可能。',love:'感情多變，容易大起大落，需要學會在關係中保持穩定。',career:'適合創業、改革、需要開創新局的工作。',health:'注意腎臟與泌尿系統。'}
+};
+
+function starHtml(name, sihua){
+  var mark='';
+  if(sihua){
+    if(sihua['祿']===name) mark='<span style="color:var(--jade);font-size:.7em">化祿</span>';
+    else if(sihua['權']===name) mark='<span style="color:var(--gold);font-size:.7em">化權</span>';
+    else if(sihua['科']===name) mark='<span style="color:var(--purple);font-size:.7em">化科</span>';
+    else if(sihua['忌']===name) mark='<span style="color:var(--rust);font-size:.7em">化忌</span>';
+  }
+  return '<span class="pc-star main">'+name+'</span>'+mark;
+}
+
+function sec(icon,title,body){
+  return '<div class="sec"><div class="sec-head"><div class="sec-icon">'+icon+'</div>'+title+'</div><div class="sec-body">'+body+'</div></div>';
+}
+
+function getPalaceStars(z,zhiIdx){
+  var mains=[]; var auxs=[];
+  Object.keys(z.mainStars).forEach(function(n){ if(z.mainStars[n]===zhiIdx) mains.push(n); });
+  Object.keys(z.auxStars).forEach(function(n){ if(z.auxStars[n]===zhiIdx) auxs.push(n); });
+  return {mains:mains,auxs:auxs};
+}
+
+function genPage(id){
+  var z=ZW;
+  if(!z) return '';
+  var html='';
+
+  if(id==='p1'){
+    var gridOrder=[5,6,7,8,4,-1,-1,9,3,-1,-1,10,2,1,0,11];
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">壹</div>命盤總覽</div>';
+    html+='<div class="palace-grid">';
+    for(var pos=0; pos<16; pos++){
+      if(pos===5){
+        html+='<div class="p-cell center" style="grid-column:2;grid-row:2">'+centerInfo()+'</div>';
+        continue;
+      }
+      if(pos===6||pos===9||pos===10) continue;
+      var palaceIdx=gridOrder[pos];
+      if(palaceIdx<0) continue;
+      var zhiIdx=getPalaceZhi(z.mingGongZhi,palaceIdx);
+      var stars=getPalaceStars(z,zhiIdx);
+      var isSelf=palaceIdx===0;
+      html+='<div class="p-cell'+(isSelf?' self':'')+'">';
+      html+='<span class="pc-zhi">'+ZHI[zhiIdx]+'</span>';
+      html+='<div class="pc-name">'+PALACE_NAMES[palaceIdx]+'</div>';
+      html+='<div class="pc-stars">';
+      stars.mains.forEach(function(n){ html+=starHtml(n,z.sihua)+' '; });
+      stars.auxs.forEach(function(n){ html+='<span class="pc-star lucky">'+n+'</span> '; });
+      html+='</div></div>';
+    }
+    html+='</div>';
+    html+='<div class="sec-body">';
+    html+='<p><strong>'+z.name+'</strong>　'+(z.gender==='female'?'女命':'男命')+'　'+z.status+'</p>';
+    html+='<p>國曆：'+z.y+'年'+z.m+'月'+z.d+'日　農曆：'+z.lunar.year+'年'+(z.lunar.isLeap?'閏':'')+z.lunar.month+'月'+z.lunar.day+'日　'+ZHI[z.hourIdx]+'時</p>';
+    html+='<p>命宮：<span class="hl">'+ZHI[z.mingGongZhi]+'宮</span>　身宮：<span class="hl">'+ZHI[z.shenGongZhi]+'宮</span>　五行局：<span class="gold">'+z.juWx+z.ju+'局</span></p>';
+    html+='<p>命主：'+z.mingZhu+'　身主：'+z.shenZhu+'</p>';
+    html+='</div></div>';
+  }
+
+  if(id==='p2'){
+    var mingStars=getPalaceStars(z,z.mingGongZhi);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">貳</div>命宮主星深度解析</div><div class="sec-body">';
+    if(mingStars.mains.length===0){
+      html+='<p style="color:var(--mist)">命宮無主星（借對宮星曜），這代表你的個性容易受環境和身邊的人影響而形塑，人生方向較晚定型，但也代表可塑性極高。</p>';
+      var oppositeZhi=(z.mingGongZhi+6)%12;
+      var oppStars=getPalaceStars(z,oppositeZhi);
+      if(oppStars.mains.length>0){
+        html+='<p>命宮對宮（遷移宮）有<span class="hl">'+oppStars.mains.join('、')+'</span>，這代表你的性格特質會透過對外的際遇和互動展現出來。</p>';
+        oppStars.mains.forEach(function(n){
+          var info=STAR_INFO[n];
+          if(info) html+='<p style="margin-top:8px"><strong>'+n+'</strong>：'+info.trait+'</p>';
+        });
+      }
+    } else {
+      mingStars.mains.forEach(function(n){
+        var info=STAR_INFO[n];
+        if(info){
+          html+='<p><strong style="color:var(--purple)">'+n+'</strong>'+(z.sihua['祿']===n?'（化祿）':z.sihua['權']===n?'（化權）':z.sihua['科']===n?'（化科）':z.sihua['忌']===n?'（化忌）':'')+'：'+info.trait+'</p>';
+        }
+      });
+    }
+    if(mingStars.auxs.length>0){
+      html+='<p style="margin-top:10px"><span class="hl">輔星加持：</span>'+mingStars.auxs.join('、')+'</p>';
+      var auxDesc={'左輔':'得力助手多，人生路上常有貴人相伴。','右弼':'異性緣佳，容易得到他人的協助與支持。','文昌':'文采出眾，學習能力強，利於考試升學。','文曲':'口才佳，善於表達，利於才藝發展。','祿存':'財運穩健，一生衣食無缺，但個性較保守。','天魁':'貴人運強，容易得到長輩或上位者提拔。','天鉞':'貴人運強，尤其容易得到異性的幫助。'};
+      mingStars.auxs.forEach(function(n){ if(auxDesc[n]) html+='<p style="font-size:.85rem">'+n+'：'+auxDesc[n]+'</p>'; });
+    }
+    html+='<div class="tip">命宮是紫微斗數的核心，代表你這輩子最根本的性格底色和人生格局，其他十一宮都是圍繞命宮展開的人生面向。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p3'){
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">參</div>四化飛星分析</div><div class="sec-body">';
+    html+='<p style="font-size:.78rem;color:var(--mist);margin-bottom:12px">四化代表你出生那一年天干帶來的能量流向，是紫微斗數判斷吉凶起伏最重要的線索之一。</p>';
+    var sihuaDesc={
+      '祿':{name:'化祿',color:'jade',desc:'代表財富、順遂、好運的能量。'},
+      '權':{name:'化權',color:'gold',desc:'代表權力、掌控、主導的能量。'},
+      '科':{name:'化科',color:'purple',desc:'代表名聲、貴人、文采的能量。'},
+      '忌':{name:'化忌',color:'rust',desc:'代表阻礙、糾結、需要突破的課題。'}
+    };
+    ['祿','權','科','忌'].forEach(function(hk){
+      var starName=z.sihua[hk];
+      var starZhi=z.mainStars[starName]!==undefined?z.mainStars[starName]:z.auxStars[starName];
+      var palaceIdx=null;
+      if(starZhi!==undefined){
+        for(var pi=0;pi<12;pi++){ if(getPalaceZhi(z.mingGongZhi,pi)===starZhi){ palaceIdx=pi; break; } }
+      }
+      var sd=sihuaDesc[hk];
+      html+='<div style="border-left:3px solid var(--'+sd.color+');padding:10px 14px;margin-bottom:10px;">';
+      html+='<p style="font-weight:700;color:var(--'+sd.color+')">'+sd.name+'在「'+starName+'」'+(palaceIdx!==null?'（落於'+PALACE_NAMES[palaceIdx]+'）':'')+'</p>';
+      html+='<p style="font-size:.85rem">'+sd.desc+'</p>';
+      if(palaceIdx!==null){
+        var sihuaPalaceMean={
+          '命宮':hk==='祿'?'一生運勢順遂，個性帶財氣。':hk==='權'?'天生有主導性格，掌控欲強。':hk==='科'?'重視名聲形象，容易得到肯定。':'性格中有需要面對的課題，容易鑽牛角尖。',
+          '夫妻':hk==='祿'?'婚姻感情運佳，配偶帶財。':hk==='權'?'在感情中較強勢主導。':hk==='科'?'配偶形象好，感情有面子。':'感情路上需要多磨合，容易有糾結。',
+          '財帛':hk==='祿'?'財運亨通，賺錢相對輕鬆。':hk==='權'?'對金錢有強烈掌控欲，善於理財。':hk==='科'?'錢財來源體面，善於規劃。':'財務上容易有糾結或波折，需謹慎理財。',
+          '官祿':hk==='祿'?'事業運旺，工作順遂。':hk==='權'?'適合掌權管理，事業心強。':hk==='科'?'事業上容易得到名聲與肯定。':'事業路上多有阻礙，需要更多耐心和堅持。',
+          '疾厄':hk==='祿'?'身體底子好，健康少憂。':hk==='權'?'體力旺盛但需注意過度使用。':hk==='科'?'健康狀況穩定。':'健康上需多加注意，容易有慢性困擾。'
+        };
+        var mean=sihuaPalaceMean[PALACE_NAMES[palaceIdx]];
+        if(mean) html+='<p style="font-size:.85rem;margin-top:4px">'+mean+'</p>';
+      }
+      html+='</div>';
+    });
+    html+='<div class="tip">四化忌星所在的宮位，往往是這輩子最需要用心經營和突破的地方，但也常常是磨練出最大成長的地方。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p4'){
+    var mingStars2=getPalaceStars(z,z.mingGongZhi);
+    var allMainNames=mingStars2.mains.length>0?mingStars2.mains:getPalaceStars(z,(z.mingGongZhi+6)%12).mains;
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">肆</div>性格特質總結</div><div class="sec-body">';
+    if(allMainNames.length===0){
+      html+='<p>命宮及對宮均無主星進駐，這種命格的人個性彈性極大，容易因環境、伴侶、朋友的影響而展現不同的樣貌，是「因人而異」的特殊命格，需要透過人生經歷慢慢摸索出真正的自己。</p>';
+    } else {
+      html+='<p>你的命宮主星組合是<span class="hl">'+allMainNames.join('、')+'</span>，綜合來說：</p>';
+      allMainNames.forEach(function(n){
+        var info=STAR_INFO[n];
+        if(info) html+='<p style="margin-top:6px">'+info.trait+'</p>';
+      });
+    }
+    html+='<p style="margin-top:10px"><span class="hl">命主星「'+z.mingZhu+'」</span>代表你內在深層的性格驅動力，'+(STAR_INFO[z.mingZhu]?STAR_INFO[z.mingZhu].trait.substring(0,40)+'…':'帶有獨特的能量特質。')+'</p>';
+    html+='<div class="tip">紫微斗數看性格，命宮主星是外在展現，命主星是內在核心，兩者合起來才是完整的你。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p5'){
+    var spousePalace=getPalaceZhi(z.mingGongZhi,2);
+    var spouseStars=getPalaceStars(z,spousePalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">伍</div>感情與婚姻分析</div><div class="sec-body">';
+    html+='<p>感情狀態：<span class="hl">'+z.status+'</span></p>';
+    if(spouseStars.mains.length>0){
+      html+='<p><span class="hl">夫妻宮主星：</span>'+spouseStars.mains.join('、')+'</p>';
+      spouseStars.mains.forEach(function(n){
+        var info=STAR_INFO[n];
+        if(info) html+='<p style="margin-top:6px"><strong>'+n+'</strong>：'+info.love+'</p>';
+      });
+    } else {
+      html+='<p>夫妻宮無主星，代表你的感情運勢容易受到對方個性主導，也代表你在選擇伴侶時有較大的彈性和包容度，但也要小心容易被對方的強烈個性牽著走。</p>';
+    }
+    var spouseStarNames=Object.keys(z.mainStars).filter(function(n){return z.mainStars[n]===spousePalace;});
+    var hasJiSp=spouseStarNames.some(function(n){return z.sihua['忌']===n;});
+    if(hasJiSp){
+      html+='<p class="warn" style="margin-top:8px">夫妻宮見化忌，感情路上可能會有較多磨合和考驗，需要更多耐心經營，一旦度過磨合期，感情反而更加深厚。</p>';
+    }
+    html+='<div class="tip">夫妻宮不只代表配偶的樣貌，更代表你在親密關係中會展現和經歷的模式。看懂夫妻宮，就是看懂自己在愛裡的樣子。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p6'){
+    var wealthPalace=getPalaceZhi(z.mingGongZhi,4);
+    var wealthStars=getPalaceStars(z,wealthPalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">陸</div>財帛宮分析</div><div class="sec-body">';
+    if(wealthStars.mains.length>0){
+      html+='<p><span class="hl">財帛宮主星：</span>'+wealthStars.mains.join('、')+'</p>';
+      var wealthDesc={'紫微':'財運穩健，容易掌管大筆資金，適合往管理階層發展財路。','天機':'靠智慧和策略生財，適合動腦筋的投資或事業。','太陽':'財來財去，樂於分享，適合公眾性質的事業帶財。','武曲':'正財運強，是天生的理財高手，適合金融相關領域。','天同':'財運平順，不會大富大貴但衣食無缺，適合穩定收入型工作。','廉貞':'財運起伏較大，適合有變化性、創意性的收入來源。','天府':'財庫穩固，善於守成和積累，適合長期理財規劃。','太陰':'財運細水長流，適合儲蓄和穩健投資，女命尤其財運佳。','貪狼':'偏財運旺，人脈帶財，但花費也大，需要理財紀律。','巨門':'靠口才和專業生財，適合顧問、教育類收入來源。','天相':'財運穩定，善於輔助他人也能因此得到回報。','天梁':'財運穩健，也容易得到長輩或貴人在財務上的幫助。','七殺':'財運起伏大，適合冒險性投資，但也要注意風險控管。','破軍':'財來財去波動大，適合白手起家、大破大立的財富模式。'};
+      wealthStars.mains.forEach(function(n){ if(wealthDesc[n]) html+='<p style="margin-top:6px">'+wealthDesc[n]+'</p>'; });
+    } else {
+      html+='<p>財帛宮無主星，財運容易受外在環境和合作對象影響，建議尋找穩定的合作夥伴或固定收入來源，避免過度投機。</p>';
+    }
+    var wealthStarNames=Object.keys(z.mainStars).filter(function(n){return z.mainStars[n]===wealthPalace;});
+    var hasLu=wealthStarNames.some(function(n){return z.sihua['祿']===n;});
+    var hasJi=wealthStarNames.some(function(n){return z.sihua['忌']===n;});
+    if(hasLu) html+='<p class="hl" style="margin-top:8px">財帛宮見化祿，財運錦上添花，是求財的好命格。</p>';
+    if(hasJi) html+='<p class="warn" style="margin-top:8px">財帛宮見化忌，理財需格外謹慎，避免衝動投資或借貸。</p>';
+    html+='<div class="tip">財帛宮看的不只是賺多少錢，更是你和金錢的關係、賺錢的方式，以及花錢的習慣。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p7'){
+    var careerPalace=getPalaceZhi(z.mingGongZhi,8);
+    var careerStars=getPalaceStars(z,careerPalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">柒</div>事業與官祿宮</div><div class="sec-body">';
+    if(careerStars.mains.length>0){
+      html+='<p><span class="hl">官祿宮主星：</span>'+careerStars.mains.join('、')+'</p>';
+      careerStars.mains.forEach(function(n){
+        var info=STAR_INFO[n];
+        if(info) html+='<p style="margin-top:6px"><strong>'+n+'</strong>：'+info.career+'</p>';
+      });
+    } else {
+      html+='<p>官祿宮無主星，事業發展較容易受到環境、老闆、或合作夥伴的影響而變動，建議選擇一個穩定的產業或團隊深耕，而非頻繁跳槽。</p>';
+    }
+    html+='<div class="tip">官祿宮不只是工作，更代表你在社會上扮演的角色和成就感的來源，找到與你星曜特質相符的舞台，事業運自然順遂。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p8'){
+    var healthPalace=getPalaceZhi(z.mingGongZhi,5);
+    var healthStars=getPalaceStars(z,healthPalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">捌</div>疾厄宮健康分析</div><div class="sec-body">';
+    if(healthStars.mains.length>0){
+      html+='<p><span class="hl">疾厄宮主星：</span>'+healthStars.mains.join('、')+'</p>';
+      healthStars.mains.forEach(function(n){
+        var info=STAR_INFO[n];
+        if(info) html+='<p style="margin-top:6px"><strong>'+n+'</strong>：'+info.health+'</p>';
+      });
+    } else {
+      html+='<p>疾厄宮無主星，代表健康狀況相對平穩，較不容易有明顯的體質性弱點，但仍需維持良好的生活習慣。</p>';
+    }
+    var healthStarNames=Object.keys(z.mainStars).filter(function(n){return z.mainStars[n]===healthPalace;});
+    var hasJi2=healthStarNames.some(function(n){return z.sihua['忌']===n;});
+    if(hasJi2) html+='<p class="warn" style="margin-top:8px">疾厄宮見化忌，需特別留意身體警訊，建議定期健康檢查，不要輕忽小毛病。</p>';
+    html+='<div class="tip">疾厄宮反映的是先天體質傾向，不是絕對的疾病預言，透過良好的生活習慣，可以有效降低先天弱點帶來的影響。</div>';
+    html+='<p style="font-size:.75rem;color:var(--mist);margin-top:8px">※ 命理角度參考，不作為醫療診斷，身體不適請就醫。</p>';
+    html+='</div></div>';
+  }
+
+  if(id==='p9'){
+    var travelPalace=getPalaceZhi(z.mingGongZhi,6);
+    var friendPalace=getPalaceZhi(z.mingGongZhi,7);
+    var travelStars=getPalaceStars(z,travelPalace);
+    var friendStars=getPalaceStars(z,friendPalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">玖</div>遷移宮與交友宮</div><div class="sec-body">';
+    html+='<p><span class="hl">遷移宮（外出運勢）：</span>'+(travelStars.mains.length>0?travelStars.mains.join('、'):'無主星，出外發展運勢平穩，不特別受環境影響。')+'</p>';
+    if(travelStars.mains.length>0) html+='<p style="font-size:.85rem">代表你出外、旅行、或到外地發展時容易展現的樣貌與際遇，這個宮位強的人往往在外地反而比在家鄉更容易發光發熱。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">交友宮（人際關係）：</span>'+(friendStars.mains.length>0?friendStars.mains.join('、'):'無主星，人際關係較不固定，交友圈流動性大。')+'</p>';
+    if(friendStars.mains.length>0) html+='<p style="font-size:.85rem">代表你身邊朋友、部屬、平輩的相處模式，也反映你在團體中扮演的角色。</p>';
+    html+='<div class="tip">遷移宮強的人適合往外發展，交友宮強的人重視人際網絡，兩者合看能幫助你判斷適合在哪裡、和什麼樣的人一起打拼。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p10'){
+    var housePalace=getPalaceZhi(z.mingGongZhi,9);
+    var fudePalace=getPalaceZhi(z.mingGongZhi,10);
+    var houseStars=getPalaceStars(z,housePalace);
+    var fudeStars=getPalaceStars(z,fudePalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">拾</div>田宅宮與福德宮</div><div class="sec-body">';
+    html+='<p><span class="hl">田宅宮（不動產運）：</span>'+(houseStars.mains.length>0?houseStars.mains.join('、'):'無主星，置產運勢平穩，較無強烈傾向。')+'</p>';
+    if(houseStars.mains.length>0) html+='<p style="font-size:.85rem">代表你這輩子與不動產、家庭環境的緣分，這個宮位好的人通常較容易置產，也容易有安穩的家庭環境。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">福德宮（精神享受）：</span>'+(fudeStars.mains.length>0?fudeStars.mains.join('、'):'無主星，精神生活較為簡單平靜。')+'</p>';
+    if(fudeStars.mains.length>0) html+='<p style="font-size:.85rem">代表你的興趣嗜好、精神寄託與人生觀，這個宮位反映你晚年的心境和幸福感來源。</p>';
+    html+='<div class="tip">田宅宮看物質基礎，福德宮看精神富足，兩者兼顧才是真正圓滿的人生。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p11'){
+    var parentPalace=getPalaceZhi(z.mingGongZhi,11);
+    var childPalace=getPalaceZhi(z.mingGongZhi,3);
+    var parentStars=getPalaceStars(z,parentPalace);
+    var childStars=getPalaceStars(z,childPalace);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十一</div>父母宮與子女宮</div><div class="sec-body">';
+    html+='<p><span class="hl">父母宮（與父母的緣分）：</span>'+(parentStars.mains.length>0?parentStars.mains.join('、'):'無主星，與父母關係平穩，較無特殊際遇。')+'</p>';
+    if(parentStars.mains.length>0) html+='<p style="font-size:.85rem">代表你與父母長輩的緣分和相處模式，也反映你和上位者（老闆、長官）的互動傾向。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">子女宮（與子女的緣分）：</span>'+(childStars.mains.length>0?childStars.mains.join('、'):'無主星，子女緣平穩，較無特殊際遇。')+'</p>';
+    if(childStars.mains.length>0) html+='<p style="font-size:.85rem">代表你與子女的緣分深淺，也反映你的創造力和才藝展現的方式。</p>';
+    html+='<div class="tip">無論宮位星曜強弱，親情的緣分深淺不能只看命盤，用心經營和陪伴才是關係長久的關鍵。</div>';
+    html+='</div></div>';
+  }
+
+  if(id==='p12'){
+    var currentAge=z.analYear-z.y;
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十二</div>大限與流年</div>';
+    html+='<div class="sec-body"><p>五行局：<span class="hl">'+z.juWx+z.ju+'局</span>　起運年齡：<span class="hl">'+z.ju+'歲</span>　行運方向：<span class="hl">'+(z.shunxing?'順行':'逆行')+'</span></p></div>';
+    html+='<div class="daxian-row">';
+    z.daxians.forEach(function(dx){
+      var isCurrent=(currentAge>=dx.startAge&&currentAge<=dx.endAge);
+      html+='<div class="daxian-item'+(isCurrent?' current':'')+'">'+
+        '<div class="dx-age">'+dx.startAge+'～'+dx.endAge+'歲</div>'+
+        '<div class="dx-name">'+PALACE_NAMES[dx.palaceIdx]+'</div>'+
+        '<div style="font-size:.6rem;color:var(--mist)">'+ZHI[dx.zhiIdx]+'宮</div>'+
+        '</div>';
+    });
+    html+='</div>';
+    var currentDx=null;
+    for(var ci=0;ci<z.daxians.length;ci++){
+      if(currentAge>=z.daxians[ci].startAge&&currentAge<=z.daxians[ci].endAge){ currentDx=z.daxians[ci]; break; }
+    }
+    if(currentDx){
+      var dxStars=getPalaceStars(z,currentDx.zhiIdx);
+      html+='<div class="sec-body"><p><span class="hl">當前大限（'+currentDx.startAge+'～'+currentDx.endAge+'歲，大限'+PALACE_NAMES[currentDx.palaceIdx]+'）：</span></p>';
+      html+='<p>這個大限走的是你命盤的「'+PALACE_NAMES[currentDx.palaceIdx]+'」宮位，'+(dxStars.mains.length>0?'主星為'+dxStars.mains.join('、')+'，':'')+'代表這十年的人生重心和機運方向會圍繞著'+PALACE_NAMES[currentDx.palaceIdx]+'所代表的意義展開。</p></div>';
+    }
+    html+='</div>';
+  }
+
+  if(id==='p13'){
+    var mingStars3=getPalaceStars(z,z.mingGongZhi);
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">結</div>綜合建議</div><div class="sec-body">';
+    html+='<p class="hl">給'+z.name+'的命盤總結：</p>';
+    html+='<p>命宮'+(mingStars3.mains.length>0?'主星「'+mingStars3.mains.join('、')+'」':'借對宮星曜')+'，五行'+z.juWx+z.ju+'局，這是你這輩子的能量基調。</p>';
+    var jiStarPalace=null;
+    Object.keys(z.mainStars).forEach(function(n){ if(z.sihua['忌']===n){
+      for(var pi=0;pi<12;pi++){ if(getPalaceZhi(z.mingGongZhi,pi)===z.mainStars[n]){ jiStarPalace=PALACE_NAMES[pi]; break; } }
+    }});
+    if(jiStarPalace) html+='<p>化忌落在「'+jiStarPalace+'」，這是你這輩子最需要用心經營的課題，同時也是突破後最能帶來成長的地方。</p>';
+    html+='<p style="margin-top:10px"><span class="hl">'+z.analYear+'年整體建議：</span></p>';
+    var currentAge2=z.analYear-z.y;
+    var currentDx2=null;
+    for(var cj=0;cj<z.daxians.length;cj++){
+      if(currentAge2>=z.daxians[cj].startAge&&currentAge2<=z.daxians[cj].endAge){ currentDx2=z.daxians[cj]; break; }
+    }
+    if(currentDx2) html+='<p>目前走「'+PALACE_NAMES[currentDx2.palaceIdx]+'」大限，是人生重心放在這個面向的十年，建議把握這段時間的能量，專注在相對應的人生課題上。</p>';
+    html+='<div class="tip">紫微斗數看的是先天格局與後天運勢的交織，命盤給的是方向和提醒，真正的人生還是掌握在自己手上，用心生活，命盤只會是輔助，不會是限制。</div>';
+    html+='</div></div>';
+  }
+
+  return html;
+}
+
+function centerInfo(){
+  var z=ZW;
+  return '<div style="font-family:\'Noto Serif TC\',serif;font-weight:700;color:var(--purple);font-size:.9rem;margin-bottom:6px;">'+z.name+'</div>'+
+    '<div style="font-size:.68rem;color:var(--mist);">'+z.y+'/'+z.m+'/'+z.d+'</div>'+
+    '<div style="font-size:.68rem;color:var(--mist);margin-top:2px;">'+z.juWx+z.ju+'局</div>';
+}
+
+(function(){
+  var yearSel=document.getElementById('f-year');
+  for(var y=2010;y>=1930;y--){
+    var o=document.createElement('option');
+    o.value=y;o.textContent=y+'年';
+    yearSel.appendChild(o);
+  }
+  var daySel=document.getElementById('f-day');
+  for(var d=1;d<=31;d++){
+    var o2=document.createElement('option');
+    o2.value=d;o2.textContent=d+'日';
+    daySel.appendChild(o2);
+  }
+  var analSel=document.getElementById('f-anal-year');
+  var cy=new Date().getFullYear();
+  for(var ay=cy-1;ay<=cy+3;ay++){
+    var o3=document.createElement('option');
+    o3.value=ay;o3.textContent=ay+'年';
+    if(ay===cy)o3.selected=true;
+    analSel.appendChild(o3);
+  }
+})();
+
+function copyText(t){if(!t||!t.trim()){alert('請先起盤');return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){alert('已複製！');}).catch(function(){fbCopy(t);});}else{fbCopy(t);}}
+function fbCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');alert('已複製！');}catch(e){alert('請手動複製');}document.body.removeChild(ta);}
+function copyCurrentPage(){var p=document.querySelector('.page.on');if(!p){alert('請先起盤');return;}var h=p.querySelector('.sec-head');var b=p.querySelector('.sec-body')||p;var ti=h?h.textContent.trim():'';var bo=(b.innerText||b.textContent).trim();copyText(ti+'\n\n'+bo);}
+function copyAll(){if(!ZW){alert('請先起盤');return;}var arr=['紫微斗數命盤報告',ZW.name+'｜'+ZW.y+'/'+ZW.m+'/'+ZW.d,'命宮：'+ZHI[ZW.mingGongZhi]+'　五行局：'+ZW.juWx+ZW.ju+'局',''];document.querySelectorAll('.page').forEach(function(p){var h=p.querySelector('.sec-head');var b=p.querySelector('.sec-body')||p;if(h&&b){arr.push(h.textContent.trim());arr.push((b.innerText||b.textContent).trim());arr.push('');}});copyText(arr.join('\n'));}
+
+function goNav(view, el){
+  document.querySelectorAll('.nav-a').forEach(function(a){
+    a.classList.remove('on');
+    a.style.color='rgba(255,255,255,.5)';
+    a.style.borderBottomColor='transparent';
+  });
+  el.classList.add('on');
+  el.style.color='var(--gold)';
+  el.style.borderBottomColor='var(--gold)';
+  document.getElementById('analyze-view').style.display = view==='analyze' ? '' : 'none';
+  document.getElementById('crm-view').style.display = view==='crm' ? '' : 'none';
+  if(view==='crm') renderClients();
+}
+
+var clients=JSON.parse(localStorage.getItem('mp_clients')||'[]');
+var editIdx=-1;
+
+function renderClients(){
+  var el=document.getElementById('client-list');
+  if(!clients.length){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--mist);font-size:.88rem;">尚未新增任何客戶</div>';
+    return;
+  }
+  el.innerHTML='';
+  clients.forEach(function(c,i){
+    var div=document.createElement('div');
+    div.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;';
+    div.innerHTML='<div><h3 style="font-size:.92rem;font-weight:700;margin-bottom:4px;">'+c.name+'</h3>'+
+      '<p style="font-size:.78rem;color:var(--mist);line-height:1.6;">'+(c.phone||'')+(c.note?' ｜ '+c.note:'')+'</p></div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0;">'+
+      '<button onclick="loadClient('+i+')" style="padding:6px 12px;border:1px solid var(--purple);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--purple);color:#fff;">起盤</button>'+
+      '<button onclick="editClient('+i+')" style="padding:6px 12px;border:1px solid var(--border);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--bg);">編輯</button>'+
+      '<button onclick="delClient('+i+')" style="padding:6px 12px;border:1px solid var(--border);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--bg);">刪除</button>'+
+      '</div>';
+    el.appendChild(div);
+  });
+}
+function openAddClient(){
+  editIdx=-1;
+  document.getElementById('modal-title').textContent='新增客戶';
+  ['c-name','c-phone','c-year','c-month','c-day','c-note'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('client-modal').style.display='flex';
+}
+function editClient(i){
+  editIdx=i;
+  var c=clients[i];
+  document.getElementById('modal-title').textContent='編輯客戶';
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-year').value=c.year||'';
+  document.getElementById('c-month').value=c.month||'';
+  document.getElementById('c-day').value=c.day||'';
+  document.getElementById('c-note').value=c.note||'';
+  document.getElementById('client-modal').style.display='flex';
+}
+function closeModal(){ document.getElementById('client-modal').style.display='none'; }
+function saveClient(){
+  var c={
+    name:document.getElementById('c-name').value.trim(),
+    phone:document.getElementById('c-phone').value.trim(),
+    year:document.getElementById('c-year').value.trim(),
+    month:document.getElementById('c-month').value.trim(),
+    day:document.getElementById('c-day').value.trim(),
+    note:document.getElementById('c-note').value.trim()
+  };
+  if(!c.name){alert('請輸入姓名');return;}
+  if(editIdx>=0){ c=Object.assign({},clients[editIdx],c); clients[editIdx]=c; }
+  else clients.push(c);
+  localStorage.setItem('mp_clients',JSON.stringify(clients));
+  closeModal();
+  renderClients();
+}
+function delClient(i){
+  if(!confirm('確定刪除「'+clients[i].name+'」？')) return;
+  clients.splice(i,1);
+  localStorage.setItem('mp_clients',JSON.stringify(clients));
+  renderClients();
+}
+function loadClient(i){
+  var c=clients[i];
+  document.getElementById('f-name').value=c.name||'';
+  if(c.year) document.getElementById('f-year').value=c.year;
+  if(c.month) document.getElementById('f-month').value=c.month;
+  if(c.day) document.getElementById('f-day').value=c.day;
+  if(c.gender) document.getElementById('f-gender').value=c.gender;
+  if(c.status) document.getElementById('f-status').value=c.status;
+  goNav('analyze', document.querySelectorAll('.nav-a')[0]);
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
