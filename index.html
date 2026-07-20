@@ -486,6 +486,21 @@ function getPalaceStars(z,zhiIdx){
   return {mains:mains,auxs:auxs};
 }
 
+var GOOD_STARS=['紫微','天府','太陽','太陰','天同','天梁','天相'];
+var STRONG_STARS=['武曲','七殺','破軍','貪狼'];
+function judgeGrade(starsObj, sihua){
+  var mains=starsObj.mains;
+  if(mains.length===0) return {grade:'平',desc:'無主星坐守，運勢起伏不大，較容易受環境或身邊的人影響。'};
+  var hasGood=mains.some(function(n){return GOOD_STARS.indexOf(n)>=0;});
+  var hasStrong=mains.some(function(n){return STRONG_STARS.indexOf(n)>=0;});
+  var hasJi=mains.some(function(n){return sihua['忌']===n;});
+  var hasLu=mains.some(function(n){return sihua['祿']===n;});
+  if(hasJi) return {grade:'需留意',desc:'主星化忌，這個領域容易遇到波折與考驗，需要更多耐心和智慧去化解。'};
+  if(hasLu||(hasGood&&!hasStrong)) return {grade:'佳',desc:'主星帶吉，這個領域運勢順遂，容易得到好的際遇與發展。'};
+  if(hasStrong) return {grade:'中上（動盪帶機運）',desc:'主星帶煞氣但也帶衝勁，這個領域起伏較大，但也充滿突破與開創的機會。'};
+  return {grade:'平順',desc:'整體運勢平穩，沒有特別突出，也沒有明顯的凶象。'};
+}
+
 function genPage(id){
   var z=ZW;
   if(!z) return '';
@@ -695,11 +710,15 @@ function genPage(id){
     var friendPalace=getPalaceZhi(z.mingGongZhi,7);
     var travelStars=getPalaceStars(z,travelPalace);
     var friendStars=getPalaceStars(z,friendPalace);
+    var travelJudge=judgeGrade(travelStars,z.sihua);
+    var friendJudge=judgeGrade(friendStars,z.sihua);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">玖</div>遷移宮與交友宮</div><div class="sec-body">';
-    html+='<p><span class="hl">遷移宮（外出運勢）：</span>'+(travelStars.mains.length>0?travelStars.mains.join('、'):'無主星，出外發展運勢平穩，不特別受環境影響。')+'</p>';
-    if(travelStars.mains.length>0) html+='<p style="font-size:.85rem">代表你出外、旅行、或到外地發展時容易展現的樣貌與際遇，這個宮位強的人往往在外地反而比在家鄉更容易發光發熱。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">交友宮（人際關係）：</span>'+(friendStars.mains.length>0?friendStars.mains.join('、'):'無主星，人際關係較不固定，交友圈流動性大。')+'</p>';
-    if(friendStars.mains.length>0) html+='<p style="font-size:.85rem">代表你身邊朋友、部屬、平輩的相處模式，也反映你在團體中扮演的角色。</p>';
+    html+='<p><span class="hl">遷移宮（外出運勢）：</span>'+(travelStars.mains.length>0?travelStars.mains.join('、'):'無主星')+'　<span class="'+(travelJudge.grade==='需留意'?'warn':'gold')+'">【'+travelJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+travelJudge.desc+'</p>';
+    if(travelStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">代表你出外、旅行、或到外地發展時容易展現的樣貌與際遇。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">交友宮（人際關係）：</span>'+(friendStars.mains.length>0?friendStars.mains.join('、'):'無主星')+'　<span class="'+(friendJudge.grade==='需留意'?'warn':'gold')+'">【'+friendJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+friendJudge.desc+'</p>';
+    if(friendStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">代表你身邊朋友、部屬、平輩的相處模式，也反映你在團體中扮演的角色。</p>';
     html+='<div class="tip">遷移宮強的人適合往外發展，交友宮強的人重視人際網絡，兩者合看能幫助你判斷適合在哪裡、和什麼樣的人一起打拼。</div>';
     html+='</div></div>';
   }
@@ -709,11 +728,15 @@ function genPage(id){
     var fudePalace=getPalaceZhi(z.mingGongZhi,10);
     var houseStars=getPalaceStars(z,housePalace);
     var fudeStars=getPalaceStars(z,fudePalace);
+    var houseJudge=judgeGrade(houseStars,z.sihua);
+    var fudeJudge=judgeGrade(fudeStars,z.sihua);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">拾</div>田宅宮與福德宮</div><div class="sec-body">';
-    html+='<p><span class="hl">田宅宮（不動產運）：</span>'+(houseStars.mains.length>0?houseStars.mains.join('、'):'無主星，置產運勢平穩，較無強烈傾向。')+'</p>';
-    if(houseStars.mains.length>0) html+='<p style="font-size:.85rem">代表你這輩子與不動產、家庭環境的緣分，這個宮位好的人通常較容易置產，也容易有安穩的家庭環境。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">福德宮（精神享受）：</span>'+(fudeStars.mains.length>0?fudeStars.mains.join('、'):'無主星，精神生活較為簡單平靜。')+'</p>';
-    if(fudeStars.mains.length>0) html+='<p style="font-size:.85rem">代表你的興趣嗜好、精神寄託與人生觀，這個宮位反映你晚年的心境和幸福感來源。</p>';
+    html+='<p><span class="hl">田宅宮（不動產運）：</span>'+(houseStars.mains.length>0?houseStars.mains.join('、'):'無主星')+'　<span class="'+(houseJudge.grade==='需留意'?'warn':'gold')+'">【'+houseJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+houseJudge.desc+'</p>';
+    if(houseStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">這個宮位好的人通常較容易置產，也容易有安穩的家庭環境。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">福德宮（精神享受）：</span>'+(fudeStars.mains.length>0?fudeStars.mains.join('、'):'無主星')+'　<span class="'+(fudeJudge.grade==='需留意'?'warn':'gold')+'">【'+fudeJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+fudeJudge.desc+'</p>';
+    if(fudeStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">這個宮位反映你晚年的心境和幸福感來源。</p>';
     html+='<div class="tip">田宅宮看物質基礎，福德宮看精神富足，兩者兼顧才是真正圓滿的人生。</div>';
     html+='</div></div>';
   }
@@ -723,11 +746,15 @@ function genPage(id){
     var childPalace=getPalaceZhi(z.mingGongZhi,3);
     var parentStars=getPalaceStars(z,parentPalace);
     var childStars=getPalaceStars(z,childPalace);
+    var parentJudge=judgeGrade(parentStars,z.sihua);
+    var childJudge=judgeGrade(childStars,z.sihua);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十一</div>父母宮與子女宮</div><div class="sec-body">';
-    html+='<p><span class="hl">父母宮（與父母的緣分）：</span>'+(parentStars.mains.length>0?parentStars.mains.join('、'):'無主星，與父母關係平穩，較無特殊際遇。')+'</p>';
-    if(parentStars.mains.length>0) html+='<p style="font-size:.85rem">代表你與父母長輩的緣分和相處模式，也反映你和上位者（老闆、長官）的互動傾向。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">子女宮（與子女的緣分）：</span>'+(childStars.mains.length>0?childStars.mains.join('、'):'無主星，子女緣平穩，較無特殊際遇。')+'</p>';
-    if(childStars.mains.length>0) html+='<p style="font-size:.85rem">代表你與子女的緣分深淺，也反映你的創造力和才藝展現的方式。</p>';
+    html+='<p><span class="hl">父母宮（與父母的緣分）：</span>'+(parentStars.mains.length>0?parentStars.mains.join('、'):'無主星')+'　<span class="'+(parentJudge.grade==='需留意'?'warn':'gold')+'">【'+parentJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+parentJudge.desc+'</p>';
+    if(parentStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">也反映你和上位者（老闆、長官）的互動傾向。</p>';
+    html+='<p style="margin-top:12px"><span class="hl">子女宮（與子女的緣分）：</span>'+(childStars.mains.length>0?childStars.mains.join('、'):'無主星')+'　<span class="'+(childJudge.grade==='需留意'?'warn':'gold')+'">【'+childJudge.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+childJudge.desc+'</p>';
+    if(childStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">也反映你的創造力和才藝展現的方式。</p>';
     html+='<div class="tip">無論宮位星曜強弱，親情的緣分深淺不能只看命盤，用心經營和陪伴才是關係長久的關鍵。</div>';
     html+='</div></div>';
   }
