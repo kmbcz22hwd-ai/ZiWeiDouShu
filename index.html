@@ -501,6 +501,119 @@ function judgeGrade(starsObj, sihua){
   return {grade:'平順',desc:'整體運勢平穩，沒有特別突出，也沒有明顯的凶象。'};
 }
 
+// ══════════════════════════════════════════════════════════
+// 宮位深度解讀資料庫：每顆主星在每種宮位類型的具體現況＋未來可能性
+// ══════════════════════════════════════════════════════════
+var PALACE_STAR_DETAIL={
+  '田宅':{
+    '紫微':{now:'目前家運穩固，家中往往有一定的地位或話語權，置產運勢佳，容易擁有屬於自己的房產。',future:'未來置產機會多，且傾向購買地段較好、較有面子的房產，家庭環境會越住越舒適體面。'},
+    '天府':{now:'家底穩固，善於守成，這輩子與不動產緣分深厚，家中財庫穩定。',future:'未來置產運極佳，適合長期持有不動產，是家族財富的守護者，房產會越來越多。'},
+    '太陽':{now:'家中氣氛開朗，但也可能操心家務較多，置產運普通偏佳。',future:'隨著事業發展，置產能力會逐漸提升，晚年家運趨於穩定明亮。'},
+    '太陰':{now:'家庭環境溫馨細膩，與不動產、田產有天生的緣分，尤其容易受母系家庭影響。',future:'未來置產運非常好，尤其晚年更容易累積不動產，是財富細水長流型。'},
+    '武曲':{now:'對置產有強烈企圖心，善於精打細算買房置產，家中重視財務規劃。',future:'未來置產能力強，適合投資不動產，家運會隨著財富累積越來越穩固。'},
+    '天同':{now:'家庭氣氛溫和舒適，物質慾望不高，置產運勢平順但不強求。',future:'家運平穩安逸，不太會有大起大落，晚年家庭生活愜意自在。'},
+    '廉貞':{now:'家運起伏較大，可能經歷搬遷或家庭環境的變動。',future:'未來置產運會有波動，建議謹慎評估風險再做決定，穩紮穩打反而更好。'},
+    '貪狼':{now:'對居家品味有自己的想法，喜歡有特色的居住環境，置產運不錯但花費也大。',future:'未來有機會置產，但需節制物慾，避免因追求排場而超出負荷。'},
+    '巨門':{now:'家中容易有較多的口角或意見分歧，家運需要更多溝通經營。',future:'未來置產路上可能遇到糾紛或法律問題，簽約置產時務必仔細確認合約細節。'},
+    '天相':{now:'家庭環境穩定和諧，這輩子與不動產、家庭環境緣分佳，容易置產。',future:'未來置產運穩健向上，家庭關係也會越來越圓滿融洽。'},
+    '天梁':{now:'家中常有長輩庇蔭或提攜，置產運穩健，家庭重視傳統價值。',future:'未來容易得到家族長輩在置產上的幫助，家運穩健向上。'},
+    '七殺':{now:'家運變動較大，可能經歷家庭環境的重大轉折，置產態度較為果斷冒險。',future:'未來置產運起伏大，適合積極進取但要留意風險控管，人生中可能有一次大搬遷或置產機會。'},
+    '破軍':{now:'家運變化大，容易有搬遷、重新裝修或家庭結構改變的情況。',future:'未來置產路上會經歷幾次大的轉折，先破後立，中晚年後家運會逐漸穩定下來。'}
+  },
+  '福德':{
+    '紫微':{now:'精神生活富足，天生有較高的自我要求和格局，內心追求品質與尊嚴。',future:'晚年精神生活會越來越充實，容易在興趣或修養上有所成就，是有格調的晚年。'},
+    '天府':{now:'內心穩定知足，不容易被外界影響情緒，是天生的樂天派。',future:'晚年心境平和滿足，物質與精神都有保障，是福氣深厚的命格。'},
+    '太陽':{now:'重視付出與奉獻的價值感，內心的滿足感常來自幫助他人。',future:'晚年容易透過公益或指導後輩獲得深層的精神滿足。'},
+    '太陰':{now:'內心細膩敏感，精神生活豐富，重視獨處和內在世界的滋養。',future:'晚年生活寧靜溫馨，容易在藝術、閱讀或靈性活動中找到心靈的歸屬。'},
+    '武曲':{now:'重視實際成就帶來的滿足感，對物質保障有較高的需求。',future:'晚年會透過財富的穩固來獲得安全感，是務實型的幸福感來源。'},
+    '天同':{now:'性格隨和知足，容易感到快樂，是天生懂得享受生活的人。',future:'晚年生活安逸舒適，是十四主星中最容易獲得平靜幸福的福德宮格局。'},
+    '廉貞':{now:'內心情緒起伏較大，精神生活較為多變，容易在興趣上多方嘗試。',future:'需要學習情緒管理，晚年若能沉澱心性，精神生活反而會更豐富多彩。'},
+    '貪狼':{now:'興趣廣泛，慾望較強，精神生活多采多姿但也容易不滿足。',future:'晚年若能收斂慾望、專注一兩項真正熱愛的興趣，會找到真正的幸福感。'},
+    '巨門':{now:'內心容易多想、鑽牛角尖，精神生活較容易感到不安或焦慮。',future:'需要學習放下多疑的性格，晚年若能透過信仰或哲學安頓內心，會活得更輕鬆。'},
+    '天相':{now:'內心平和，樂於助人，精神生活透過服務他人獲得滿足。',future:'晚年心境圓融和諧，是有福氣、受人尊敬的晚年格局。'},
+    '天梁':{now:'重視精神層次和人生意義，容易有宗教或哲學的傾向。',future:'晚年容易在靈性、宗教或指導他人中找到深刻的人生意義。'},
+    '七殺':{now:'內心好強不服輸，精神生活較緊繃，不容易真正放鬆。',future:'需要學習放下對成就的執著，晚年若能放鬆心境，反而能享受得來不易的成果。'},
+    '破軍':{now:'內心追求變化和刺激，精神生活較不安定，容易感到不滿足。',future:'晚年需要學習安頓身心，若能找到穩定的精神寄託，會化解一生的波動感。'}
+  },
+  '遷移':{
+    '紫微':{now:'出外容易受人尊重，走到哪裡都自帶氣場，適合到外地發展。',future:'未來若往外發展，事業和人脈都會有明顯提升，是適合離鄉打拼的格局。'},
+    '天府':{now:'出外運勢穩健，容易在異地得到穩定的發展機會。',future:'未來到外地發展會比留在原地更有成就，適合往外擴展版圖。'},
+    '太陽':{now:'出外容易展現領導力和熱情，在公眾場合特別容易發光發熱。',future:'未來的貴人和機會多半來自外地或公眾領域，適合往外闖蕩。'},
+    '太陰':{now:'出外運勢溫和，容易在異地遇到貴人相助，尤其女性貴人。',future:'未來若到外地發展，會有細水長流的好機運，尤其晚年在外地反而更自在。'},
+    '武曲':{now:'出外運勢積極，容易靠自己的實力在異地闖出一片天。',future:'未來到外地打拼財運會更旺，是適合離鄉發展事業的格局。'},
+    '天同':{now:'出外運勢平順，走到哪裡都容易適應，不太會水土不服。',future:'未來無論在哪裡發展都能過得舒適，是隨遇而安的格局。'},
+    '廉貞':{now:'出外際遇變化較多，容易遇到意想不到的機緣或挑戰。',future:'未來出外發展起伏較大，建議做好風險評估，機會與挑戰並存。'},
+    '貪狼':{now:'出外人緣極佳，容易在異地建立廣泛的人脈和機會。',future:'未來若往外發展，社交能力會成為你最大的資產，機會往往在外地出現。'},
+    '巨門':{now:'出外容易遇到口舌是非，需要特別注意溝通方式。',future:'未來出外發展要格外謹慎言行，靠專業口才反而能在異地闖出名號。'},
+    '天相':{now:'出外運勢穩定，容易得到他人的協助和信任。',future:'未來若往外發展，會遇到願意提攜你的貴人，適合穩健地拓展外地版圖。'},
+    '天梁':{now:'出外容易遇到長輩型的貴人相助，化險為夷的能力強。',future:'未來出外遇到困難時，往往能逢凶化吉，是有貴人保護的遷移格局。'},
+    '七殺':{now:'出外運勢強勢，敢闖敢拼，適合到外地開創新局。',future:'未來若往外發展，會有大破大立的機運，適合積極主動出擊。'},
+    '破軍':{now:'出外變動大，人生的重大轉折往往發生在異地。',future:'未來出外發展會經歷較大的起伏，先苦後甘，中年後在外地會有明顯突破。'}
+  },
+  '交友':{
+    '紫微':{now:'朋友圈中容易成為核心人物，身邊不乏優質人脈，但也要留意勿高高在上。',future:'未來人脈會越來越廣，容易得到重量級的朋友或夥伴相助。'},
+    '天府':{now:'朋友關係穩定長久，是值得信賴的朋友，也容易吸引可靠的人脈。',future:'未來人際圈會越來越穩固，老朋友的情誼會是重要的人生資產。'},
+    '太陽':{now:'朋友多且熱情，樂於在朋友圈中付出，人緣極佳。',future:'未來會因為熱心助人而累積廣泛人脈，貴人常從朋友圈中出現。'},
+    '太陰':{now:'朋友關係細膩深厚，重視少數知心朋友勝過廣泛社交。',future:'未來人際圈會趨向精緻，少數幾位深交的朋友會陪伴你一生。'},
+    '武曲':{now:'朋友圈務實，較少泛泛之交，重視有共同目標的夥伴關係。',future:'未來適合與朋友合作追求共同的財務目標，人脈帶財的機會不小。'},
+    '天同':{now:'朋友關係輕鬆自在，人緣好但不強求，是團體中的潤滑劑。',future:'未來人際關係會維持和諧，朋友圈帶來的多半是快樂而非壓力。'},
+    '廉貞':{now:'朋友圈較複雜多變，容易有愛恨分明的朋友關係。',future:'未來交友需更謹慎篩選，人脈品質比數量更重要。'},
+    '貪狼':{now:'朋友圈廣闊多元，社交能力強，是人際場合的活躍分子。',future:'未來人脈會是你最大的資產，但也要慎防因交友廣泛而遇到複雜的人事。'},
+    '巨門':{now:'朋友關係容易有口舌是非，需要更謹慎經營人際分寸。',future:'未來交友要格外注意言語分際，避免因誤會而傷了情誼。'},
+    '天相':{now:'朋友關係和諧，樂於在朋友間扮演協調者的角色。',future:'未來人脈會持續累積，是可靠又受歡迎的朋友類型。'},
+    '天梁':{now:'朋友圈中常扮演照顧者或長輩的角色，深受晚輩朋友信賴。',future:'未來會有許多後輩或晚輩型的朋友前來請益，是天生的人生導師。'},
+    '七殺':{now:'朋友圈較少但很深，重義氣，不喜歡虛偽的社交。',future:'未來人際關係會走向少而精，真心相待的朋友會在關鍵時刻挺你。'},
+    '破軍':{now:'朋友圈變動較大，容易有聚散離合，需要學習珍惜當下的情誼。',future:'未來交友會經歷幾次大的洗牌，最終留下的都是真正的知己。'}
+  },
+  '父母':{
+    '紫微':{now:'與父母關係中帶有一定的距離感和尊重，父母可能較有威嚴或地位。',future:'與上位者（老闆、長官）的關係也會偏向這種模式，適度表達自己的想法能改善互動。'},
+    '天府':{now:'與父母關係穩定，父母通常給予你物質上的保障和安全感。',future:'這種穩定的長輩緣也會延伸到職場上的貴人運，容易得到上位者的信任。'},
+    '太陽':{now:'與父親的緣分特別深，父母對你的期待和付出較多。',future:'與長官上司的關係也會較為正向，容易得到上位者的欣賞和拉拔。'},
+    '太陰':{now:'與母親緣分深厚，家庭氣氛溫馨，情感連結緊密。',future:'未來與女性長輩或女性上司的緣分也會較好，是溫和滋養型的長輩緣。'},
+    '武曲':{now:'父母個性可能較嚴肅務實，親子間情感表達較含蓄。',future:'與上位者的關係偏向工作導向，實力會是贏得信任的關鍵。'},
+    '天同':{now:'與父母關係溫和輕鬆，家庭氣氛和睦少衝突。',future:'與長官上司的相處也會較為輕鬆，不容易有嚴重的職場衝突。'},
+    '廉貞':{now:'與父母關係較為複雜多變，可能經歷情感上的起伏。',future:'與上位者的關係需要更多耐心磨合，避免因誤會累積摩擦。'},
+    '貪狼':{now:'父母個性可能較活潑或多才多藝，親子互動多元。',future:'與上位者相處需注意分寸，避免過度隨性而影響專業形象。'},
+    '巨門':{now:'與父母溝通容易有摩擦或誤解，需要更多耐心對話。',future:'與上位者的相處要特別注意言語分際，誤會往往因言語而起也因言語化解。'},
+    '天相':{now:'與父母關係和諧，家庭給予你穩定的支持系統。',future:'容易得到上位者的信任和提拔，是受長輩疼愛的格局。'},
+    '天梁':{now:'父母對你的照顧無微不至，長輩緣深厚。',future:'一生中容易遇到貴人型的長官或導師，在關鍵時刻拉你一把。'},
+    '七殺':{now:'與父母關係可能較為緊張，彼此個性都強，容易有意見衝突。',future:'與上位者相處需學習尊重與退讓，過剛則易折，適度圓融會更順利。'},
+    '破軍':{now:'與父母緣分可能較早經歷變化，或關係較為疏離。',future:'與上位者的關係起伏較大，建議建立自己的專業實力，減少對他人評價的依賴。'}
+  },
+  '子女':{
+    '紫微':{now:'子女個性可能較有主見或領導特質，親子間需要互相尊重。',future:'子女未來發展多半不錯，容易有出息，但教養上需給予適度自主空間。'},
+    '天府':{now:'子女緣穩定，孩子個性踏實，家庭關係和樂。',future:'親子關係會隨時間越來越穩固，子女也容易在物質上讓你安心。'},
+    '太陽':{now:'子女緣佳，孩子個性開朗，與子女互動熱絡。',future:'未來子女發展多半光明正向，親子情感深厚。'},
+    '太陰':{now:'子女緣深厚，尤其與女兒緣分特別好，親子情感細膩。',future:'子女未來發展穩定溫和，親子關係會越來越貼心。'},
+    '武曲':{now:'子女個性可能較獨立務實，親子間情感表達較內斂。',future:'子女未來在事業財務上容易有成就，是務實型的親子緣。'},
+    '天同':{now:'子女緣輕鬆愉快，孩子個性溫和，家庭氣氛和諧。',future:'親子關係會維持和樂，是少操心的子女緣。'},
+    '廉貞':{now:'子女緣分較為多變，親子關係可能經歷一些起伏。',future:'需要更多耐心經營親子關係，避免因情緒化的溝通造成隔閡。'},
+    '貪狼':{now:'子女可能才藝出眾，個性活潑，親子互動多采多姿。',future:'子女未來發展多元，但也要留意適度引導，避免過度放任。'},
+    '巨門':{now:'親子溝通容易有摩擦，孩子可能較直言不諱。',future:'需要學習傾聽子女的想法，親子關係會在耐心溝通中逐漸改善。'},
+    '天相':{now:'子女緣和諧，孩子個性溫和懂事，親子關係融洽。',future:'子女未來發展穩健，親子情感會持續深厚。'},
+    '天梁':{now:'子女緣深厚，你在教養上扮演如師如友的角色。',future:'子女未來容易得到你的庇蔭和指導，是受惠深遠的親子緣。'},
+    '七殺':{now:'子女個性可能較強勢獨立，親子間需要更多溝通磨合。',future:'子女未來發展有魄力，但親子關係需要學習彼此尊重和放手。'},
+    '破軍':{now:'子女緣分可能經歷較多變化，親子關係需要用心維繫。',future:'子女未來的人生會有較多轉折，作為父母需給予更多的包容與支持。'}
+  }
+};
+
+function getPalaceDeepDetail(palaceType, starsObj){
+  if(starsObj.mains.length===0) return null;
+  var details=[];
+  starsObj.mains.forEach(function(n){
+    var d=PALACE_STAR_DETAIL[palaceType]&&PALACE_STAR_DETAIL[palaceType][n];
+    if(d) details.push({star:n, now:d.now, future:d.future});
+  });
+  return details.length>0?details:null;
+}
+
+// 六煞星檢查：擎羊、陀羅、火星、鈴星（文昌文曲化忌另計）
+var SHA_XING=['擎羊','陀羅','火星','鈴星'];
+function checkShaXing(starsObj){
+  var found=starsObj.auxs.filter(function(n){return SHA_XING.indexOf(n)>=0;});
+  return found.length>0?found.join('、'):null;
+}
+
 function genPage(id){
   var z=ZW;
   if(!z) return '';
@@ -712,13 +825,31 @@ function genPage(id){
     var friendStars=getPalaceStars(z,friendPalace);
     var travelJudge=judgeGrade(travelStars,z.sihua);
     var friendJudge=judgeGrade(friendStars,z.sihua);
+    var travelDetail=getPalaceDeepDetail('遷移',travelStars);
+    var friendDetail=getPalaceDeepDetail('交友',friendStars);
+    var travelSha=checkShaXing(travelStars);
+    var friendSha=checkShaXing(friendStars);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">玖</div>遷移宮與交友宮</div><div class="sec-body">';
     html+='<p><span class="hl">遷移宮（外出運勢）：</span>'+(travelStars.mains.length>0?travelStars.mains.join('、'):'無主星')+'　<span class="'+(travelJudge.grade==='需留意'?'warn':'gold')+'">【'+travelJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+travelJudge.desc+'</p>';
-    if(travelStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">代表你出外、旅行、或到外地發展時容易展現的樣貌與際遇。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">交友宮（人際關係）：</span>'+(friendStars.mains.length>0?friendStars.mains.join('、'):'無主星')+'　<span class="'+(friendJudge.grade==='需留意'?'warn':'gold')+'">【'+friendJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+friendJudge.desc+'</p>';
-    if(friendStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">代表你身邊朋友、部屬、平輩的相處模式，也反映你在團體中扮演的角色。</p>';
+    if(travelDetail){
+      travelDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+travelJudge.desc+' 出外發展沒有特別突出的優劣勢，運勢會較貼近你本命的能量特質，出外際遇平穩發展。</p>';
+    }
+    if(travelSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 遷移宮見'+travelSha+'，出外容易遇到突發狀況或小人，行事宜謹慎，避免衝動決定搬遷或轉換環境。</p>';
+    html+='<p style="margin-top:14px"><span class="hl">交友宮（人際關係）：</span>'+(friendStars.mains.length>0?friendStars.mains.join('、'):'無主星')+'　<span class="'+(friendJudge.grade==='需留意'?'warn':'gold')+'">【'+friendJudge.grade+'】</span></p>';
+    if(friendDetail){
+      friendDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+friendJudge.desc+' 人際圈流動性較大，重質不重量地經營少數幾位真心的朋友，會比廣泛社交更有幫助。</p>';
+    }
+    if(friendSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 交友宮見'+friendSha+'，人際關係中要慎防小人或利益糾紛，重要合作前務必多方查證。</p>';
     html+='<div class="tip">遷移宮強的人適合往外發展，交友宮強的人重視人際網絡，兩者合看能幫助你判斷適合在哪裡、和什麼樣的人一起打拼。</div>';
     html+='</div></div>';
   }
@@ -730,13 +861,31 @@ function genPage(id){
     var fudeStars=getPalaceStars(z,fudePalace);
     var houseJudge=judgeGrade(houseStars,z.sihua);
     var fudeJudge=judgeGrade(fudeStars,z.sihua);
+    var houseDetail=getPalaceDeepDetail('田宅',houseStars);
+    var fudeDetail=getPalaceDeepDetail('福德',fudeStars);
+    var houseSha=checkShaXing(houseStars);
+    var fudeSha=checkShaXing(fudeStars);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">拾</div>田宅宮與福德宮</div><div class="sec-body">';
     html+='<p><span class="hl">田宅宮（不動產運）：</span>'+(houseStars.mains.length>0?houseStars.mains.join('、'):'無主星')+'　<span class="'+(houseJudge.grade==='需留意'?'warn':'gold')+'">【'+houseJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+houseJudge.desc+'</p>';
-    if(houseStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">這個宮位好的人通常較容易置產，也容易有安穩的家庭環境。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">福德宮（精神享受）：</span>'+(fudeStars.mains.length>0?fudeStars.mains.join('、'):'無主星')+'　<span class="'+(fudeJudge.grade==='需留意'?'warn':'gold')+'">【'+fudeJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+fudeJudge.desc+'</p>';
-    if(fudeStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">這個宮位反映你晚年的心境和幸福感來源。</p>';
+    if(houseDetail){
+      houseDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+houseJudge.desc+' 置產運勢中規中矩，建議按部就班儲蓄，機會出現時要果斷把握。</p>';
+    }
+    if(houseSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 田宅宮見'+houseSha+'，置產或家庭環境容易有突發的變動或糾紛，簽約置產前務必謹慎評估，家中風水或居家安全也建議多加留意。</p>';
+    html+='<p style="margin-top:14px"><span class="hl">福德宮（精神享受）：</span>'+(fudeStars.mains.length>0?fudeStars.mains.join('、'):'無主星')+'　<span class="'+(fudeJudge.grade==='需留意'?'warn':'gold')+'">【'+fudeJudge.grade+'】</span></p>';
+    if(fudeDetail){
+      fudeDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+fudeJudge.desc+' 精神生活較平淡，建議培養一項能長期投入的興趣，會有助於晚年的心境安頓。</p>';
+    }
+    if(fudeSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 福德宮見'+fudeSha+'，容易有內心的焦躁不安或想太多的傾向，建議透過運動、靜心等方式紓解壓力，避免累積成長期的心理負擔。</p>';
     html+='<div class="tip">田宅宮看物質基礎，福德宮看精神富足，兩者兼顧才是真正圓滿的人生。</div>';
     html+='</div></div>';
   }
@@ -748,13 +897,31 @@ function genPage(id){
     var childStars=getPalaceStars(z,childPalace);
     var parentJudge=judgeGrade(parentStars,z.sihua);
     var childJudge=judgeGrade(childStars,z.sihua);
+    var parentDetail=getPalaceDeepDetail('父母',parentStars);
+    var childDetail=getPalaceDeepDetail('子女',childStars);
+    var parentSha=checkShaXing(parentStars);
+    var childSha=checkShaXing(childStars);
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十一</div>父母宮與子女宮</div><div class="sec-body">';
     html+='<p><span class="hl">父母宮（與父母的緣分）：</span>'+(parentStars.mains.length>0?parentStars.mains.join('、'):'無主星')+'　<span class="'+(parentJudge.grade==='需留意'?'warn':'gold')+'">【'+parentJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+parentJudge.desc+'</p>';
-    if(parentStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">也反映你和上位者（老闆、長官）的互動傾向。</p>';
-    html+='<p style="margin-top:12px"><span class="hl">子女宮（與子女的緣分）：</span>'+(childStars.mains.length>0?childStars.mains.join('、'):'無主星')+'　<span class="'+(childJudge.grade==='需留意'?'warn':'gold')+'">【'+childJudge.grade+'】</span></p>';
-    html+='<p style="font-size:.85rem">'+childJudge.desc+'</p>';
-    if(childStars.mains.length>0) html+='<p style="font-size:.85rem;margin-top:4px">也反映你的創造力和才藝展現的方式。</p>';
+    if(parentDetail){
+      parentDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+parentJudge.desc+' 與父母、上位者的緣分較為平淡，不特別親密也不特別疏離，各自尊重彼此的空間反而相處更自在。</p>';
+    }
+    if(parentSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 父母宮見'+parentSha+'，與父母或上司的關係容易有較大的摩擦或代溝，建議多一份耐心，避免正面衝突。</p>';
+    html+='<p style="margin-top:14px"><span class="hl">子女宮（與子女的緣分）：</span>'+(childStars.mains.length>0?childStars.mains.join('、'):'無主星')+'　<span class="'+(childJudge.grade==='需留意'?'warn':'gold')+'">【'+childJudge.grade+'】</span></p>';
+    if(childDetail){
+      childDetail.forEach(function(d){
+        html+='<p style="font-size:.85rem;margin-top:6px"><strong>'+d.star+'　現況：</strong>'+d.now+'</p>';
+        html+='<p style="font-size:.85rem"><strong>未來可能性：</strong>'+d.future+'</p>';
+      });
+    } else {
+      html+='<p style="font-size:.85rem">'+childJudge.desc+' 子女緣分平順，親子關係會隨著用心的陪伴自然發展，不需要過度擔心命盤的顯示。</p>';
+    }
+    if(childSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:6px">⚠ 子女宮見'+childSha+'，親子關係中可能會經歷較大的磨合期，孩子個性可能較有主見，建議用引導取代命令式的教養。</p>';
     html+='<div class="tip">無論宮位星曜強弱，親情的緣分深淺不能只看命盤，用心經營和陪伴才是關係長久的關鍵。</div>';
     html+='</div></div>';
   }
