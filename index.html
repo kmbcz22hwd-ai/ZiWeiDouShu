@@ -455,7 +455,7 @@ var STAR_INFO={
   '天同':{trait:'溫和、隨性、享受生活，是十四主星中最溫柔的星曜。個性隨和，不喜歡競爭，容易滿足，但有時候也容易缺乏鬥志。',love:'感情運通常不錯，容易遇到疼愛你的人，但需要避免過度依賴。',career:'適合服務業、需要親和力的工作。',health:'注意消化系統與內分泌。'},
   '廉貞':{trait:'多變、有魅力，是次桃花星，也帶有一定的鋒芒和爭議性。個性複雜多面，有時溫和有時強勢，情緒起伏較大。',love:'感情較為複雜多變，桃花不少，需要學會專一和穩定。',career:'適合創意、公關、需要應變能力的工作。',health:'注意心血管與血液系統。'},
   '天府':{trait:'穩重、包容、善於理財，是天生的守成者和管理者。個性穩定可靠，有一種讓人安心的氣場，但有時候也顯得保守。',love:'感情中扮演照顧者的角色，是值得依靠的伴侶。',career:'適合管理、財務、行政類工作。',health:'注意脾胃消化系統。'},
-  '太陰':{trait:'細膩、感性、內斂含蓄，是十四主星中最溫柔體貼的星曜之一。個性溫和內向，重視情感層面，容易替他人著想。',love:'感情豐富細膩，容易多愁善感，需要一個懂得你心思的伴侶。',career:'適合藝術、美容、需要細心的工作。',health:'注意婦科與情緒相關疾病。'},
+  '太陰':{trait:'細膩、感性、內斂含蓄，是十四主星中最溫柔體貼的星曜之一。個性溫和內向，重視情感層面，容易替他人著想。',love:'感情豐富細膩，容易多愁善感，需要一個懂得你心思的伴侶。',career:'適合藝術、美容、需要細心的工作。',health:'注意內分泌與情緒相關疾病。'},
   '貪狼':{trait:'多才多藝，慾望強烈，是第一大桃花星，充滿魅力與吸引力。個性活潑善於交際，興趣廣泛，但有時候容易見異思遷。',love:'桃花極旺，感情經歷可能較豐富，需要學會定下心來。',career:'適合業務、演藝、需要交際手腕的工作。',health:'注意肝腎與泌尿系統。'},
   '巨門':{trait:'口才好，善於分析辯論，也容易招惹是非。個性直言不諱，觀察力敏銳，但說話有時候太直接容易得罪人。',love:'感情中溝通很重要，容易因言語產生誤會，需要多留意說話方式。',career:'適合法律、教育、傳播類工作。',health:'注意口腔與消化系統。'},
   '天相':{trait:'溫和、忠誠、有服務精神，是天生的輔佐之才，樂於幫助他人。個性隨和低調，重視和諧，但有時候缺乏主見。',love:'感情中是忠誠的伴侶，重視承諾與穩定。',career:'適合輔佐、幕僚、服務類工作。',health:'注意皮膚與泌尿系統。'},
@@ -780,7 +780,24 @@ function genPage(id){
       });
     }
     html+='<p style="margin-top:10px"><span class="hl">命主星「'+z.mingZhu+'」</span>代表你內在深層的性格驅動力，'+(STAR_INFO[z.mingZhu]?STAR_INFO[z.mingZhu].trait.substring(0,40)+'…':'帶有獨特的能量特質。')+'</p>';
-    html+='<div class="tip">紫微斗數看性格，命宮主星是外在展現，命主星是內在核心，兩者合起來才是完整的你。</div>';
+    // 四化對命宮性格的影響
+    var mingSihuaNames=allMainNames.filter(function(n){return ['祿','權','科','忌'].some(function(hk){return z.sihua[hk]===n;});});
+    if(mingSihuaNames.length>0){
+      mingSihuaNames.forEach(function(n){
+        var hkType=['祿','權','科','忌'].find(function(hk){return z.sihua[hk]===n;});
+        var sihuaPersonality={
+          '祿':'命宮見化祿，個性上天生帶有一種讓人親近的福氣感，做事容易得到順水推舟的助力，性格中帶有樂觀知足的底色。',
+          '權':'命宮見化權，個性天生帶有主導欲和掌控力，不喜歡被安排，習慣自己決定方向，是天生的領導者性格。',
+          '科':'命宮見化科，個性重視形象和名聲，行事風格較為講究，容易在人群中展現出有內涵、有氣質的一面。',
+          '忌':'命宮見化忌，個性中帶有一份執著或糾結，容易在某些事情上鑽牛角尖，這是你這輩子最重要的性格功課。'
+        };
+        html+='<p style="margin-top:8px;font-size:.85rem">'+sihuaPersonality[hkType]+'</p>';
+      });
+    }
+    // 六煞對命宮性格的影響
+    var mingSha=checkShaXing(mingStars2.mains.length>0?mingStars2:getPalaceStars(z,(z.mingGongZhi+6)%12));
+    if(mingSha) html+='<p style="font-size:.85rem;color:var(--rust);margin-top:8px">⚠ 命宮見'+mingSha+'，個性中帶有較強的稜角或急躁的一面，情緒管理和耐心是你這輩子重要的修煉課題，但這股銳氣善加引導也能成為突破困境的動力。</p>';
+    html+='<div class="tip">紫微斗數看性格，命宮主星是外在展現，命主星是內在核心，四化和煞星則是性格的細部調味，四者合起來才是完整的你。</div>';
     html+='</div></div>';
   }
 
@@ -856,7 +873,12 @@ function genPage(id){
       html+='<p><span class="hl">疾厄宮主星：</span>'+healthStars.mains.join('、')+'</p>';
       healthStars.mains.forEach(function(n){
         var info=STAR_INFO[n];
-        if(info) html+='<p style="margin-top:6px"><strong>'+n+'</strong>：'+info.health+'</p>';
+        if(info){
+          var extra='';
+          if(n==='太陰') extra=z.gender==='female'?'女命需額外留意婦科相關保養。':'男命需額外留意泌尿系統與內分泌調理。';
+          if(n==='貪狼') extra=z.gender==='female'?'女命需留意婦科與內分泌調理。':'男命需留意泌尿系統與肝腎功能。';
+          html+='<p style="margin-top:6px"><strong>'+n+'</strong>：'+info.health+(extra?'　'+extra:'')+'</p>';
+        }
       });
     } else {
       html+='<p>疾厄宮無主星，代表健康狀況相對平穩，較不容易有明顯的體質性弱點，但仍需維持良好的生活習慣。</p>';
@@ -1008,18 +1030,40 @@ function genPage(id){
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">結</div>綜合建議</div><div class="sec-body">';
     html+='<p class="hl">給'+z.name+'的命盤總結：</p>';
     html+='<p>命宮'+(mingStars3.mains.length>0?'主星「'+mingStars3.mains.join('、')+'」':'借對宮星曜')+'，五行'+z.juWx+z.ju+'局，這是你這輩子的能量基調。</p>';
-    var jiStarPalace=null;
-    Object.keys(z.mainStars).forEach(function(n){ if(z.sihua['忌']===n){
-      for(var pi=0;pi<12;pi++){ if(getPalaceZhi(z.mingGongZhi,pi)===z.mainStars[n]){ jiStarPalace=PALACE_NAMES[pi]; break; } }
-    }});
-    if(jiStarPalace) html+='<p>化忌落在「'+jiStarPalace+'」，這是你這輩子最需要用心經營的課題，同時也是突破後最能帶來成長的地方。</p>';
-    html+='<p style="margin-top:10px"><span class="hl">'+z.analYear+'年整體建議：</span></p>';
+
+    // 掃描十二宮，找出化祿/化權/化科落宮（優勢面向）與化忌落宮（課題面向）
+    var luPalace=null,quanPalace=null,kePalace=null,jiPalace=null;
+    Object.keys(z.mainStars).forEach(function(n){
+      var zhi=z.mainStars[n];
+      var pi=null;
+      for(var k=0;k<12;k++){ if(getPalaceZhi(z.mingGongZhi,k)===zhi){ pi=k; break; } }
+      if(pi===null) return;
+      if(z.sihua['祿']===n) luPalace=PALACE_NAMES[pi];
+      if(z.sihua['權']===n) quanPalace=PALACE_NAMES[pi];
+      if(z.sihua['科']===n) kePalace=PALACE_NAMES[pi];
+      if(z.sihua['忌']===n) jiPalace=PALACE_NAMES[pi];
+    });
+
+    html+='<p style="margin-top:10px"><span class="hl">你這輩子最順遂的面向：</span></p>';
+    if(luPalace) html+='<p style="font-size:.85rem">化祿落在「'+luPalace+'」，這是你命盤中能量最順、福氣最旺的領域，好好經營這個面向，會是人生最重要的資產來源。</p>';
+    if(quanPalace) html+='<p style="font-size:.85rem">化權落在「'+quanPalace+'」，你在這個領域天生具有主導力和決斷力，適合在此發揮領導才能。</p>';
+    if(kePalace) html+='<p style="font-size:.85rem">化科落在「'+kePalace+'」，這個領域容易為你帶來好的名聲和貴人緣，值得用心經營形象。</p>';
+    if(!luPalace&&!quanPalace&&!kePalace) html+='<p style="font-size:.85rem">命盤四化未落在主星宮位，整體運勢較為平均，沒有特別突出的爆發點，穩紮穩打是最適合你的人生策略。</p>';
+
+    if(jiPalace) html+='<p style="margin-top:10px"><span class="warn">這輩子最需要用心經營的課題：</span></p><p style="font-size:.85rem">化忌落在「'+jiPalace+'」，這是你命盤中最容易卡關、也最需要耐心突破的領域。但命理的規律是：化忌所在，往往也是磨練出最大智慧和成長的地方，一旦跨越，反而會成為你人生的深度和厚度。</p>';
+
+    html+='<p style="margin-top:12px"><span class="hl">'+z.analYear+'年整體建議：</span></p>';
     var currentAge2=z.analYear-z.y;
     var currentDx2=null;
     for(var cj=0;cj<z.daxians.length;cj++){
       if(currentAge2>=z.daxians[cj].startAge&&currentAge2<=z.daxians[cj].endAge){ currentDx2=z.daxians[cj]; break; }
     }
-    if(currentDx2) html+='<p>目前走「'+PALACE_NAMES[currentDx2.palaceIdx]+'」大限，是人生重心放在這個面向的十年，建議把握這段時間的能量，專注在相對應的人生課題上。</p>';
+    if(currentDx2){
+      html+='<p style="font-size:.85rem">目前走「'+PALACE_NAMES[currentDx2.palaceIdx]+'」大限，是人生重心放在這個面向的十年，建議把握這段時間的能量，專注在相對應的人生課題上。</p>';
+      if(luPalace&&currentDx2.zhiIdx===getPalaceZhi(z.mingGongZhi,PALACE_NAMES.indexOf(luPalace))) {
+        html+='<p style="font-size:.85rem;color:var(--jade)">巧的是，這個大限剛好走到你化祿的宮位，是這十年特別值得把握的黃金時期。</p>';
+      }
+    }
     html+='<div class="tip">紫微斗數看的是先天格局與後天運勢的交織，命盤給的是方向和提醒，真正的人生還是掌握在自己手上，用心生活，命盤只會是輔助，不會是限制。</div>';
     html+='</div></div>';
   }
