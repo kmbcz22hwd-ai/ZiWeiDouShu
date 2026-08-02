@@ -334,6 +334,65 @@ function placeAuxStars(yearGanIdx, yearZhiIdx, lunarMonth, hourIdx){
   return aux;
 }
 
+// ══════════════════════════════════════════════════════════
+// 十二神系統（長生十二神、博士十二神、歲前十二神、將前十二神）
+// ══════════════════════════════════════════════════════════
+
+// ① 長生十二神：長生沐浴冠帶臨官帝旺衰病死墓絕胎養
+var CHANGSHENG_NAMES=['長生','沐浴','冠帶','臨官','帝旺','衰','病','死','墓','絕','胎','養'];
+function placeChangSheng(ju, shunxing){
+  // 起始宮位依五行局
+  var startMap={2:8,3:11,4:5,5:8,6:2}; // 水2局申、木3局亥、金4局巳、土5局申、火6局寅
+  var start=startMap[ju];
+  var result={};
+  CHANGSHENG_NAMES.forEach(function(name,i){
+    var pos=shunxing?(start+i)%12:((start-i)%12+12)%12;
+    result[pos]=name;
+  });
+  return result; // {zhiIdx: 神名}
+}
+
+// ② 博士十二神：博士力士青龍小耗將軍奏書飛廉喜神病符大耗伏兵官府
+var BOSHI_NAMES=['博士','力士','青龍','小耗','將軍','奏書','飛廉','喜神','病符','大耗','伏兵','官府'];
+function placeBoShi(lucunZhi, shunxing){
+  var result={};
+  BOSHI_NAMES.forEach(function(name,i){
+    var pos=shunxing?(lucunZhi+i)%12:((lucunZhi-i)%12+12)%12;
+    result[pos]=name;
+  });
+  return result;
+}
+
+// ③ 歲前十二神：歲建晦氣喪門貫索官符小耗大耗龍德白虎天德弔客病符
+var SUIQIAN_NAMES=['歲建','晦氣','喪門','貫索','官符','小耗','大耗','龍德','白虎','天德','弔客','病符'];
+function placeSuiQian(liuNianZhi){
+  var result={};
+  SUIQIAN_NAMES.forEach(function(name,i){
+    var pos=(liuNianZhi+i)%12; // 恆順行
+    result[pos]=name;
+  });
+  return result;
+}
+
+// ④ 將前十二神：將星攀鞍歲驛息神華蓋劫煞災煞天煞指背咸池月煞亡神
+var JIANGQIAN_NAMES=['將星','攀鞍','歲驛','息神','華蓋','劫煞','災煞','天煞','指背','咸池','月煞','亡神'];
+function placeJiangQian(liuNianZhi){
+  // 依年支三合局定將星起點
+  var jiangxingMap={
+    0:0, 4:0, 8:0,   // 申子辰 → 將星在子
+    5:9, 9:9, 1:9,   // 巳酉丑 → 將星在酉
+    2:6, 6:6, 10:6,  // 寅午戌 → 將星在午
+    11:3, 3:3, 7:3   // 亥卯未 → 將星在卯
+  };
+  var start=jiangxingMap[liuNianZhi];
+  var result={};
+  JIANGQIAN_NAMES.forEach(function(name,i){
+    var pos=(start+i)%12; // 恆順行
+    result[pos]=name;
+  });
+  return result;
+}
+
 var SIHUA_TABLE={
   0:{'祿':'廉貞','權':'破軍','科':'武曲','忌':'太陽'},
   1:{'祿':'天機','權':'天梁','科':'紫微','忌':'太陰'},
@@ -392,13 +451,21 @@ function runZiwei(){
     daxians.push({zhiIdx:pZhi, startAge:startAge, endAge:startAge+9, palaceIdx:i});
   }
 
+  // 十二神系統
+  var changSheng=placeChangSheng(juInfo.ju, shunxing);
+  var boShi=placeBoShi(auxStars['祿存'], shunxing);
+  var lyGanZhi=getYearGanZhi(analYear);
+  var suiQian=placeSuiQian(lyGanZhi.zhi);
+  var jiangQian=placeJiangQian(lyGanZhi.zhi);
+
   ZW={
     name:name,gender:gender,y:y,m:m,d:d,hourIdx:hourIdx,status:status,analYear:analYear,
     lunar:lunar,yearGan:yg.gan,yearZhi:yg.zhi,
     mingGongZhi:mingGongZhi,shenGongZhi:shenGongZhi,
     ju:juInfo.ju,juWx:juInfo.wx,
     ziweiZhi:ziweiZhi,mainStars:mainStars,auxStars:auxStars,sihua:sihua,
-    mingZhu:mingZhu,shenZhu:shenZhu,shunxing:shunxing,daxians:daxians
+    mingZhu:mingZhu,shenZhu:shenZhu,shunxing:shunxing,daxians:daxians,
+    changSheng:changSheng,boShi:boShi,suiQian:suiQian,jiangQian:jiangQian
   };
 
   document.getElementById('r-title').textContent=name+'｜'+y+'/'+m+'/'+d+' 紫微斗數命盤';
@@ -421,6 +488,7 @@ var PAGE_DEFS=[
   {id:'p10',label:'田宅福德'},
   {id:'p11',label:'父母子女'},
   {id:'p12',label:'大限流年'},
+  {id:'p14',label:'十二神煞'},
   {id:'p13',label:'綜合建議'}
 ];
 
@@ -1022,6 +1090,107 @@ function genPage(id){
       html+='<div class="sec-body"><p><span class="hl">當前大限（'+currentDx.startAge+'～'+currentDx.endAge+'歲，大限'+PALACE_NAMES[currentDx.palaceIdx]+'）：</span></p>';
       html+='<p>這個大限走的是你命盤的「'+PALACE_NAMES[currentDx.palaceIdx]+'」宮位，'+(dxStars.mains.length>0?'主星為'+dxStars.mains.join('、')+'，':'')+'代表這十年的人生重心和機運方向會圍繞著'+PALACE_NAMES[currentDx.palaceIdx]+'所代表的意義展開。</p></div>';
     }
+    html+='</div>';
+  }
+
+  if(id==='p14'){
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十四</div>十二神煞系統</div>';
+    html+='<div class="sec-body"><p style="font-size:.78rem;color:var(--mist);margin-bottom:12px">十二神煞是紫微斗數中輔助判斷吉凶細節的四組神煞系統，分別對應不同的人生課題面向。</p></div>';
+
+    // ① 長生十二神 — 命宮位置的解讀最重要
+    var csAtMing=z.changSheng[z.mingGongZhi];
+    var CS_DESC={
+      '長生':{grade:'吉',desc:'代表生命力旺盛、新生與希望，命宮見長生的人通常身體底子好，做事有源源不絕的動力。'},
+      '沐浴':{grade:'平',desc:'代表桃花與變動，命宮見沐浴的人個性較敏感多情，人生中會經歷幾次重要的洗滌與蛻變。'},
+      '冠帶':{grade:'吉',desc:'代表成長與準備，命宮見冠帶的人年輕時發展較晚熟，但後勢看漲，是大器晚成的格局。'},
+      '臨官':{grade:'吉',desc:'代表事業高峰與掌權，命宮見臨官的人事業心強，容易在職場上獲得地位與成就。'},
+      '帝旺':{grade:'吉',desc:'代表能量最旺盛的巔峰狀態，命宮見帝旺的人天生氣場強大，個性剛強自信，但也要留意過旺則衰的道理，適度收斂鋒芒。'},
+      '衰':{grade:'需留意',desc:'代表能量開始收斂，命宮見衰的人個性較為保守內斂，凡事宜穩健行事，不宜躁進。'},
+      '病':{grade:'需留意',desc:'代表體質較弱或情緒敏感，命宮見病的人需要特別留意身心健康的保養，情緒管理也是重要課題。'},
+      '死':{grade:'需留意',desc:'代表能量沉潛、性格深沉，命宮見死的人容易想得深遠，但也容易陷入負面情緒，建議培養正向的心理韌性。'},
+      '墓':{grade:'需留意',desc:'代表內斂儲藏的能量，命宮見墓的人善於守成和積蓄，個性低調務實，是厚積薄發的格局。'},
+      '絕':{grade:'需留意',desc:'代表歸零與重生的能量，命宮見絕的人人生容易經歷較大的轉折起伏，但也因此有從谷底翻身的韌性。'},
+      '胎':{grade:'吉',desc:'代表新生命的孕育，命宮見胎的人充滿創造力和可能性，人生中容易有意想不到的新開始。'},
+      '養':{grade:'吉',desc:'代表被滋養與照顧的能量，命宮見養的人容易得到他人的關愛和支持，個性溫和，人緣不錯。'}
+    };
+    var csInfo=CS_DESC[csAtMing];
+    html+='<div class="sec-body" style="margin-bottom:0"><p style="font-weight:700;color:var(--purple);margin-bottom:8px">① 長生十二神（命宮見「'+csAtMing+'」）　<span class="'+(csInfo.grade==='需留意'?'warn':'gold')+'">【'+csInfo.grade+'】</span></p>';
+    html+='<p style="font-size:.85rem">'+csInfo.desc+'</p></div>';
+
+    // 顯示長生十二神在夫妻/財帛/官祿的分布（次重要宮位）
+    var keyPalaces=[{idx:2,name:'夫妻宮'},{idx:4,name:'財帛宮'},{idx:8,name:'官祿宮'}];
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    keyPalaces.forEach(function(kp){
+      var zhi=getPalaceZhi(z.mingGongZhi,kp.idx);
+      var cs=z.changSheng[zhi];
+      html+='<p style="font-size:.82rem">'+kp.name+'見「'+cs+'」——'+(CS_DESC[cs]?CS_DESC[cs].desc.split('，')[1]||CS_DESC[cs].desc:'')+'</p>';
+    });
+    html+='</div>';
+
+    // ② 博士十二神 — 命宮與財帛宮
+    var BS_DESC={
+      '博士':'代表智慧與學識，主聰明好學，利於考試進修。',
+      '力士':'代表權力與地位，主掌權有威，適合擔任管理職務。',
+      '青龍':'代表喜氣與吉慶，主人緣佳、易逢喜事。',
+      '小耗':'代表小額破財，理財宜謹慎，避免不必要的花費。',
+      '將軍':'代表威嚴與魄力，主性格剛強，適合需要決斷力的工作。',
+      '奏書':'代表文書與名聲，利於文書契約類事務，容易得到肯定。',
+      '飛廉':'代表口舌是非，需留意言語分寸，避免招惹麻煩。',
+      '喜神':'代表喜慶吉利，主逢凶化吉，人生較少大波折。',
+      '病符':'代表健康需留意，這個宮位所在領域要多注意身體警訊。',
+      '大耗':'代表較大的破財或損失，理財決策需格外謹慎。',
+      '伏兵':'代表暗中的競爭或小人，行事宜低調謹慎，避免樹大招風。',
+      '官府':'代表官司訴訟或行政事務，簽約合作需仔細確認條款細節。'
+    };
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:8px">② 博士十二神</p>';
+    html+='<p style="font-size:.85rem">命宮見「'+z.boShi[z.mingGongZhi]+'」——'+BS_DESC[z.boShi[z.mingGongZhi]]+'</p>';
+    html+='<p style="font-size:.85rem;margin-top:4px">財帛宮見「'+z.boShi[getPalaceZhi(z.mingGongZhi,4)]+'」——'+BS_DESC[z.boShi[getPalaceZhi(z.mingGongZhi,4)]]+'</p>';
+    html+='</div>';
+
+    // ③ 歲前十二神（今年流年）
+    var SQ_DESC={
+      '歲建':'今年是你命盤流年的起點，代表新的一年運勢正式展開。',
+      '晦氣':'今年運勢較為低調沉悶，宜謹慎行事，避免高調躁進。',
+      '喪門':'今年需留意與長輩或家族相關的事務，行事宜穩重。',
+      '貫索':'今年容易有糾紛或牽絆的事務，簽約合作需特別謹慎。',
+      '官符':'今年需留意官司訴訟或行政糾紛，凡事按規矩來最保險。',
+      '小耗':'今年容易有小額破財，理財宜謹慎規劃。',
+      '大耗':'今年財務上需特別謹慎，避免大額的衝動消費或投資。',
+      '龍德':'今年運勢逢凶化吉，是相對平順吉利的一年。',
+      '白虎':'今年需留意意外或健康方面的狀況，凡事宜多加小心。',
+      '天德':'今年有貴人庇佑，運勢相對順遂，適合推展重要計畫。',
+      '弔客':'今年情緒容易受人際關係影響，需留意人際互動的分寸。',
+      '病符':'今年健康方面需多加留意，建議定期做健康檢查。'
+    };
+    var sqAtMing=z.suiQian[z.mingGongZhi];
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:8px">③ 歲前十二神（'+z.analYear+'年流年）</p>';
+    html+='<p style="font-size:.85rem">命宮見「'+sqAtMing+'」——'+SQ_DESC[sqAtMing]+'</p>';
+    html+='</div>';
+
+    // ④ 將前十二神（今年流年）
+    var JQ_DESC={
+      '將星':'代表權威與地位，今年在這個領域容易展現領導力和影響力。',
+      '攀鞍':'代表升遷與晉升，今年利於事業上更進一步的發展。',
+      '歲驛':'代表變動與奔波，今年容易有出差、搬遷或異動的機會。',
+      '息神':'代表沉靜與休養，今年宜以靜制動，不宜過度躁進。',
+      '華蓋':'代表孤高與才藝，今年適合精進專業或投入藝術性、靈性的追求。',
+      '劫煞':'代表破財或損失的風險，今年理財需格外謹慎。',
+      '災煞':'代表意外或災厄的可能，今年凡事宜多加小心謹慎。',
+      '天煞':'代表與長輩或上位者的課題，今年需留意這方面的互動。',
+      '指背':'代表背後的是非或流言，今年需留意人際間的口舌是非。',
+      '咸池':'代表桃花與魅力，今年人緣運旺，但也要慎防爛桃花。',
+      '月煞':'代表情緒或壓力的波動，今年需多加留意心理健康。',
+      '亡神':'代表迷惘或不安的能量，今年凡事宜謹慎決策，避免衝動行事。'
+    };
+    var jqAtMing=z.jiangQian[z.mingGongZhi];
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:8px">④ 將前十二神（'+z.analYear+'年流年）</p>';
+    html+='<p style="font-size:.85rem">命宮見「'+jqAtMing+'」——'+JQ_DESC[jqAtMing]+'</p>';
+    html+='</div>';
+
+    html+='<div class="tip">十二神煞是命盤的細部調味，不是決定命運的關鍵因素，主星和四化才是根本，神煞提供的是更細膩的時機提醒。</div>';
     html+='</div>';
   }
 
