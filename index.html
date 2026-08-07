@@ -393,6 +393,48 @@ function placeJiangQian(liuNianZhi){
   return result;
 }
 
+// ══════════════════════════════════════════════════════════
+// 小限、流年、流月、流日
+// ══════════════════════════════════════════════════════════
+
+// 小限：每年一宮，依生年支及性別陰陽決定起法，男順女逆（依三合局起小限宮）
+function getXiaoXian(yearZhi, gender, currentAge){
+  // 小限起法：寅午戌年男命起辰，女命起戌；申子辰年男命起戌，女命起辰；
+  // 巳酉丑年男命起未，女命起丑；亥卯未年男命起丑，女命起未
+  var xxStartMap={
+    2:{male:4,female:10}, 6:{male:4,female:10}, 10:{male:4,female:10}, // 寅午戌
+    8:{male:10,female:4}, 0:{male:10,female:4}, 4:{male:10,female:4}, // 申子辰
+    5:{male:7,female:1}, 9:{male:7,female:1}, 1:{male:7,female:1},    // 巳酉丑
+    11:{male:1,female:7}, 3:{male:1,female:7}, 7:{male:1,female:7}   // 亥卯未
+  };
+  var start=xxStartMap[yearZhi][gender==='male'?'male':'female'];
+  // 每年順行一宮，1歲落在起始宮
+  var zhiIdx=(start+(currentAge-1))%12;
+  return zhiIdx;
+}
+
+// 流年十二宮：以流年地支為流年命宮，其餘十一宮依序排列（與本命同順序邏輯）
+function getLiuNianPalaces(liuNianZhi){
+  var palaces={};
+  for(var i=0;i<12;i++){
+    palaces[PALACE_NAMES[i]]=((liuNianZhi-i)%12+12)%12;
+  }
+  return palaces;
+}
+
+// 流月：從流年命宮所在月份起正月，順數到生月，再逆數到生時，同本命命宮定位法，但基準為流年
+function getLiuYuePalace(liuNianZhi, lunarMonth, hourIdx, targetMonth){
+  // 簡化版：流月命宮 = 流年命宮往順時針方向依序每月一宮，從流年正月起
+  var start=liuNianZhi; // 流年命宮視為流年一月起點（簡化模型，實務上會依生月生時校正）
+  var zhiIdx=(start+(targetMonth-1))%12;
+  return zhiIdx;
+}
+
+// 流日：從流月宮位起，每日順行一宮（簡化版）
+function getLiuRiPalace(liuYueZhi, targetDay){
+  return (liuYueZhi+(targetDay-1))%12;
+}
+
 var SIHUA_TABLE={
   0:{'祿':'廉貞','權':'破軍','科':'武曲','忌':'太陽'},
   1:{'祿':'天機','權':'天梁','科':'紫微','忌':'太陰'},
@@ -458,6 +500,12 @@ function runZiwei(){
   var suiQian=placeSuiQian(lyGanZhi.zhi);
   var jiangQian=placeJiangQian(lyGanZhi.zhi);
 
+  // 小限、流年十二宮、流年四化
+  var currentAgeForXX=analYear-y+1; // 虛歲
+  var xiaoXianZhi=getXiaoXian(yg.zhi, gender, Math.max(1,currentAgeForXX));
+  var liuNianPalaces=getLiuNianPalaces(lyGanZhi.zhi);
+  var liuNianSihua=SIHUA_TABLE[lyGanZhi.gan];
+
   ZW={
     name:name,gender:gender,y:y,m:m,d:d,hourIdx:hourIdx,status:status,analYear:analYear,
     lunar:lunar,yearGan:yg.gan,yearZhi:yg.zhi,
@@ -465,7 +513,9 @@ function runZiwei(){
     ju:juInfo.ju,juWx:juInfo.wx,
     ziweiZhi:ziweiZhi,mainStars:mainStars,auxStars:auxStars,sihua:sihua,
     mingZhu:mingZhu,shenZhu:shenZhu,shunxing:shunxing,daxians:daxians,
-    changSheng:changSheng,boShi:boShi,suiQian:suiQian,jiangQian:jiangQian
+    changSheng:changSheng,boShi:boShi,suiQian:suiQian,jiangQian:jiangQian,
+    xiaoXianZhi:xiaoXianZhi,liuNianZhi:lyGanZhi.zhi,liuNianGan:lyGanZhi.gan,
+    liuNianPalaces:liuNianPalaces,liuNianSihua:liuNianSihua
   };
 
   document.getElementById('r-title').textContent=name+'｜'+y+'/'+m+'/'+d+' 紫微斗數命盤';
@@ -489,6 +539,7 @@ var PAGE_DEFS=[
   {id:'p11',label:'父母子女'},
   {id:'p12',label:'大限流年'},
   {id:'p14',label:'十二神煞'},
+  {id:'p15',label:'小限流月'},
   {id:'p13',label:'綜合建議'}
 ];
 
@@ -1191,6 +1242,64 @@ function genPage(id){
     html+='</div>';
 
     html+='<div class="tip">十二神煞是命盤的細部調味，不是決定命運的關鍵因素，主星和四化才是根本，神煞提供的是更細膩的時機提醒。</div>';
+    html+='</div>';
+  }
+
+  if(id==='p15'){
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">十五</div>小限與流年流月</div>';
+    html+='<div class="sec-body">';
+
+    // 小限
+    var xxStars=getPalaceStars(z,z.xiaoXianZhi);
+    var xxPalaceIdx=null;
+    for(var xi=0;xi<12;xi++){ if(getPalaceZhi(z.mingGongZhi,xi)===z.xiaoXianZhi){ xxPalaceIdx=xi; break; } }
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:6px">① 小限（'+z.analYear+'年，虛歲'+(z.analYear-z.y+1)+'歲）</p>';
+    html+='<p style="font-size:.85rem">小限落在「'+ZHI[z.xiaoXianZhi]+'宮」'+(xxPalaceIdx!==null?'（本命'+PALACE_NAMES[xxPalaceIdx]+'）':'')+(xxStars.mains.length>0?'，主星為'+xxStars.mains.join('、'):'，此宮無主星')+'。</p>';
+    html+='<p style="font-size:.85rem;margin-top:4px">小限是每年流轉的短期運勢指標，與大限、流年相互參照，能更細緻掌握今年各階段的能量起伏。</p>';
+    html+='</div>';
+
+    // 流年十二宮
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:8px">② '+z.analYear+'年流年十二宮</p>';
+    html+='<p style="font-size:.85rem;margin-bottom:8px">流年命宮落在「'+ZHI[z.liuNianZhi]+'」，流年四化：祿「'+z.liuNianSihua['祿']+'」、權「'+z.liuNianSihua['權']+'」、科「'+z.liuNianSihua['科']+'」、忌「'+z.liuNianSihua['忌']+'」。</p>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:.8rem;">';
+    html+='<thead><tr style="background:var(--ink);color:var(--gold)"><th style="padding:6px 8px;text-align:left">流年宮位</th><th style="padding:6px 8px;text-align:left">地支</th><th style="padding:6px 8px;text-align:left">本命主星</th></tr></thead><tbody>';
+    PALACE_NAMES.forEach(function(pname,idx){
+      var zhi=z.liuNianPalaces[pname];
+      var stars=getPalaceStars(z,zhi);
+      var rowBg=(idx%2===0)?'background:var(--gold-pale)':'';
+      html+='<tr style="border-bottom:1px solid var(--border);'+rowBg+'"><td style="padding:5px 8px">'+pname+'</td><td style="padding:5px 8px">'+ZHI[zhi]+'</td><td style="padding:5px 8px">'+(stars.mains.length>0?stars.mains.join('、'):'—')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    html+='</div>';
+
+    // 流年命宮解讀
+    var liuNianMingStars=getPalaceStars(z,z.liuNianZhi);
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:6px">流年命宮解讀</p>';
+    if(liuNianMingStars.mains.length>0){
+      html+='<p style="font-size:.85rem">今年流年命宮見「'+liuNianMingStars.mains.join('、')+'」，這是今年整體運勢的核心能量，會影響你這一年的主要際遇和心境走向。</p>';
+    } else {
+      html+='<p style="font-size:.85rem">今年流年命宮無主星，運勢較容易受到大環境和身邊的人影響，宜順勢而為，不強求。</p>';
+    }
+    html+='</div>';
+
+    // 流月表格
+    html+='<div class="sec-body" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">';
+    html+='<p style="font-weight:700;color:var(--purple);margin-bottom:8px">③ '+z.analYear+'年流月速覽</p>';
+    html+='<p style="font-size:.78rem;color:var(--mist);margin-bottom:8px">流月以流年命宮為基準逐月推算，可對照當月命盤主星掌握該月的運勢重點。</p>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:.8rem;">';
+    html+='<thead><tr style="background:var(--ink);color:var(--gold)"><th style="padding:6px 8px;text-align:left">月份</th><th style="padding:6px 8px;text-align:left">流月宮</th><th style="padding:6px 8px;text-align:left">當月主星</th></tr></thead><tbody>';
+    for(var mo=1;mo<=12;mo++){
+      var lyueZhi=getLiuYuePalace(z.liuNianZhi, z.lunar.month, z.hourIdx, mo);
+      var mstars=getPalaceStars(z,lyueZhi);
+      var rowBg2=(mo%2===0)?'background:var(--gold-pale)':'';
+      html+='<tr style="border-bottom:1px solid var(--border);'+rowBg2+'"><td style="padding:5px 8px">'+mo+'月</td><td style="padding:5px 8px">'+ZHI[lyueZhi]+'宮</td><td style="padding:5px 8px">'+(mstars.mains.length>0?mstars.mains.join('、'):'—')+'</td></tr>';
+    }
+    html+='</tbody></table>';
+    html+='</div>';
+
+    html+='<div class="tip">小限看個人年度能量起伏，流年看整體大方向，流月看每月的細部節奏，三者合看能幫助你更精準掌握每個階段該注意的重點。流日因為變化太細瑣，一般僅在重大決策前才需要精算，日常生活不必過度拘泥於此。</div>';
     html+='</div>';
   }
 
