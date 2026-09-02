@@ -79,6 +79,7 @@ header p{color:rgba(255,255,255,.4);font-size:.68rem;margin-top:2px;}
 </header>
 <div class="tab-bar">
   <a onclick="goNav('analyze',this)" class="nav-a on">📋 命盤解析</a>
+  <a onclick="goNav('compare',this)" class="nav-a">💞 命盤比對</a>
   <a onclick="goNav('crm',this)" class="nav-a">👤 客戶管理</a>
 </div>
 <div class="wrap">
@@ -142,6 +143,69 @@ header p{color:rgba(255,255,255,.4);font-size:.68rem;margin-top:2px;}
   <div id="pages-container"></div>
 </div>
 <div id="copy-buf" style="display:none;white-space:pre-wrap"></div>
+</div>
+
+<div id="compare-view" style="display:none">
+  <div class="card">
+    <div class="card-title">命盤比對</div>
+    <p style="font-size:.78rem;color:var(--mist);margin-bottom:14px;">輸入雙方出生資料，選擇關係類型，進行命盤交叉分析</p>
+
+    <div style="background:var(--gold-pale);border-radius:6px;padding:14px;margin-bottom:14px;">
+      <p style="font-weight:700;color:var(--gold);margin-bottom:10px;font-size:.88rem;">A 方資料</p>
+      <div class="row2">
+        <div class="field"><label>姓名</label><input type="text" id="cp-a-name" placeholder="A方姓名"></div>
+        <div class="field"><label>性別</label><select id="cp-a-gender"><option value="female">女</option><option value="male">男</option></select></div>
+      </div>
+      <div class="row4">
+        <div class="field"><label>出生年</label><input type="number" id="cp-a-year" placeholder="1990"></div>
+        <div class="field"><label>出生月</label><input type="number" id="cp-a-month" placeholder="6" min="1" max="12"></div>
+        <div class="field"><label>出生日</label><input type="number" id="cp-a-day" placeholder="15" min="1" max="31"></div>
+        <div class="field"><label>時辰</label>
+          <select id="cp-a-hour">
+            <option value="0">子23-01</option><option value="1">丑01-03</option><option value="2">寅03-05</option>
+            <option value="3">卯05-07</option><option value="4">辰07-09</option><option value="5">巳09-11</option>
+            <option value="6">午11-13</option><option value="7">未13-15</option><option value="8">申15-17</option>
+            <option value="9">酉17-19</option><option value="10">戌19-21</option><option value="11">亥21-23</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--jade-lt);border-radius:6px;padding:14px;margin-bottom:14px;">
+      <p style="font-weight:700;color:var(--jade);margin-bottom:10px;font-size:.88rem;">B 方資料</p>
+      <div class="row2">
+        <div class="field"><label>姓名</label><input type="text" id="cp-b-name" placeholder="B方姓名"></div>
+        <div class="field"><label>性別</label><select id="cp-b-gender"><option value="male">男</option><option value="female">女</option></select></div>
+      </div>
+      <div class="row4">
+        <div class="field"><label>出生年</label><input type="number" id="cp-b-year" placeholder="1988"></div>
+        <div class="field"><label>出生月</label><input type="number" id="cp-b-month" placeholder="3" min="1" max="12"></div>
+        <div class="field"><label>出生日</label><input type="number" id="cp-b-day" placeholder="20" min="1" max="31"></div>
+        <div class="field"><label>時辰</label>
+          <select id="cp-b-hour">
+            <option value="0">子23-01</option><option value="1">丑01-03</option><option value="2">寅03-05</option>
+            <option value="3">卯05-07</option><option value="4">辰07-09</option><option value="5">巳09-11</option>
+            <option value="6">午11-13</option><option value="7">未13-15</option><option value="8">申15-17</option>
+            <option value="9">酉17-19</option><option value="10">戌19-21</option><option value="11">亥21-23</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label>關係類型</label>
+      <select id="cp-relation">
+        <option value="couple">情侶／夫妻</option>
+        <option value="partner">合夥人</option>
+        <option value="boss">老闆與員工（A為老闆）</option>
+        <option value="parent">親子（A為父母）</option>
+      </select>
+    </div>
+
+    <button class="btn" onclick="runCompare()">✦ 開始比對</button>
+  </div>
+
+  <div id="compare-result" style="display:none"></div>
 </div>
 
 <div id="crm-view" style="display:none">
@@ -454,18 +518,7 @@ function getPalaceZhi(mingGongZhiIdx, palaceIdx){
 
 var ZW=null;
 
-function runZiwei(){
-  var name=document.getElementById('f-name').value.trim()||'命主';
-  var gender=document.getElementById('f-gender').value;
-  var y=parseInt(document.getElementById('f-year').value);
-  var m=parseInt(document.getElementById('f-month').value);
-  var d=parseInt(document.getElementById('f-day').value);
-  var hourIdx=parseInt(document.getElementById('f-hour').value);
-  var status=document.getElementById('f-status').value;
-  var analYear=parseInt(document.getElementById('f-anal-year').value);
-
-  if(!y||!m||!d){alert('請選擇完整的出生年月日');return;}
-
+function computeChart(name, gender, y, m, d, hourIdx, status, analYear){
   var lunar=solar2lunar(y,m,d);
   var yg=getYearGanZhi(y);
   var mingGongZhi=getMingGong(lunar.month, hourIdx);
@@ -489,24 +542,22 @@ function runZiwei(){
   for(var i=0;i<12;i++){
     var pZhi=shunxing?(mingGongZhi+i)%12:((mingGongZhi-i)%12+12)%12;
     var startAge=juInfo.ju+i*10;
-    if(startAge>95) break; // 只保留合理人生跨度內的大限
+    if(startAge>95) break;
     daxians.push({zhiIdx:pZhi, startAge:startAge, endAge:startAge+9, palaceIdx:i});
   }
 
-  // 十二神系統
   var changSheng=placeChangSheng(juInfo.ju, shunxing);
   var boShi=placeBoShi(auxStars['祿存'], shunxing);
   var lyGanZhi=getYearGanZhi(analYear);
   var suiQian=placeSuiQian(lyGanZhi.zhi);
   var jiangQian=placeJiangQian(lyGanZhi.zhi);
 
-  // 小限、流年十二宮、流年四化
-  var currentAgeForXX=analYear-y+1; // 虛歲
+  var currentAgeForXX=analYear-y+1;
   var xiaoXianZhi=getXiaoXian(yg.zhi, gender, Math.max(1,currentAgeForXX));
   var liuNianPalaces=getLiuNianPalaces(lyGanZhi.zhi);
   var liuNianSihua=SIHUA_TABLE[lyGanZhi.gan];
 
-  ZW={
+  return {
     name:name,gender:gender,y:y,m:m,d:d,hourIdx:hourIdx,status:status,analYear:analYear,
     lunar:lunar,yearGan:yg.gan,yearZhi:yg.zhi,
     mingGongZhi:mingGongZhi,shenGongZhi:shenGongZhi,
@@ -517,6 +568,21 @@ function runZiwei(){
     xiaoXianZhi:xiaoXianZhi,liuNianZhi:lyGanZhi.zhi,liuNianGan:lyGanZhi.gan,
     liuNianPalaces:liuNianPalaces,liuNianSihua:liuNianSihua
   };
+}
+
+function runZiwei(){
+  var name=document.getElementById('f-name').value.trim()||'命主';
+  var gender=document.getElementById('f-gender').value;
+  var y=parseInt(document.getElementById('f-year').value);
+  var m=parseInt(document.getElementById('f-month').value);
+  var d=parseInt(document.getElementById('f-day').value);
+  var hourIdx=parseInt(document.getElementById('f-hour').value);
+  var status=document.getElementById('f-status').value;
+  var analYear=parseInt(document.getElementById('f-anal-year').value);
+
+  if(!y||!m||!d){alert('請選擇完整的出生年月日');return;}
+
+  ZW=computeChart(name, gender, y, m, d, hourIdx, status, analYear);
 
   document.getElementById('r-title').textContent=name+'｜'+y+'/'+m+'/'+d+' 紫微斗數命盤';
   buildPages();
@@ -524,6 +590,181 @@ function runZiwei(){
   document.getElementById('input-card').style.display='none';
   document.getElementById('result').scrollIntoView({behavior:'smooth'});
 }
+
+// ══════════════════════════════════════════════════════════
+// 命盤比對
+// ══════════════════════════════════════════════════════════
+function getMainStar(chart, palaceIdx){
+  var zhi=getPalaceZhi(chart.mingGongZhi, palaceIdx);
+  var stars=getPalaceStars(chart, zhi);
+  return stars.mains[0]||null;
+}
+
+function runCompare(){
+  var aName=document.getElementById('cp-a-name').value.trim()||'A方';
+  var aGender=document.getElementById('cp-a-gender').value;
+  var aY=parseInt(document.getElementById('cp-a-year').value);
+  var aM=parseInt(document.getElementById('cp-a-month').value);
+  var aD=parseInt(document.getElementById('cp-a-day').value);
+  var aH=parseInt(document.getElementById('cp-a-hour').value);
+
+  var bName=document.getElementById('cp-b-name').value.trim()||'B方';
+  var bGender=document.getElementById('cp-b-gender').value;
+  var bY=parseInt(document.getElementById('cp-b-year').value);
+  var bM=parseInt(document.getElementById('cp-b-month').value);
+  var bD=parseInt(document.getElementById('cp-b-day').value);
+  var bH=parseInt(document.getElementById('cp-b-hour').value);
+
+  var relation=document.getElementById('cp-relation').value;
+
+  if(!aY||!aM||!aD||!bY||!bM||!bD){ alert('請完整輸入雙方的出生年月日'); return; }
+
+  var curYear=new Date().getFullYear();
+  var A=computeChart(aName, aGender, aY, aM, aD, aH, '', curYear);
+  var B=computeChart(bName, bGender, bY, bM, bD, bH, '', curYear);
+
+  var html=genCompareReport(A, B, relation);
+  var resultEl=document.getElementById('compare-result');
+  resultEl.innerHTML=html;
+  resultEl.style.display='';
+  resultEl.scrollIntoView({behavior:'smooth'});
+}
+
+function genCompareReport(A, B, relation){
+  var aMing=getMainStar(A,0)||A.mingZhu;
+  var bMing=getMainStar(B,0)||B.mingZhu;
+  var aWx=STAR_ELEMENT[aMing]||null;
+  var bWx=STAR_ELEMENT[bMing]||null;
+  var mingRel=checkWuxingRelation(aWx,bWx);
+
+  var html='<div class="sec" style="background:linear-gradient(160deg,var(--ink) 0%,#2a1a35 100%);border-color:var(--purple);">';
+  html+='<div class="sec-head" style="color:var(--gold-lt)"><div class="sec-icon" style="background:var(--gold)">💞</div>'+A.name+' × '+B.name+' 命盤比對</div>';
+  html+='<div class="sec-body" style="color:rgba(255,255,255,.75);font-size:.82rem">';
+  html+='<p>'+A.name+'　命宮主星：'+aMing+'（'+(aWx||'—')+'）</p>';
+  html+='<p>'+B.name+'　命宮主星：'+bMing+'（'+(bWx||'—')+'）</p>';
+  html+='<p style="margin-top:6px;color:var(--gold)">雙方核心能量關係：'+mingRel.type+'——'+mingRel.desc+'</p>';
+  html+='</div></div>';
+
+  if(relation==='couple'){
+    html+=genCoupleAnalysis(A,B,mingRel);
+  } else if(relation==='partner'){
+    html+=genPartnerAnalysis(A,B,mingRel);
+  } else if(relation==='boss'){
+    html+=genBossAnalysis(A,B,mingRel);
+  } else if(relation==='parent'){
+    html+=genParentAnalysis(A,B,mingRel);
+  }
+
+  html+='<div class="tip">命盤比對提供的是能量互動的參考視角，真正決定關係好壞的，永遠是雙方的用心與溝通，命盤只是幫助你更了解彼此天生的傾向。</div>';
+  return html;
+}
+
+// ── 情侶／夫妻分析 ──
+function genCoupleAnalysis(A,B,mingRel){
+  var aSpouse=getMainStar(A,2); // A的夫妻宮
+  var bSpouse=getMainStar(B,2); // B的夫妻宮
+  var aSpouseInfo=STAR_INFO[aSpouse];
+  var bSpouseInfo=STAR_INFO[bSpouse];
+
+  var html='<div class="sec"><div class="sec-head"><div class="sec-icon">壹</div>感情關係深度分析</div><div class="sec-body">';
+  html+='<p><span class="hl">'+A.name+'的擇偶imprint（夫妻宮）：</span>'+(aSpouse||'無主星')+'</p>';
+  if(aSpouseInfo) html+='<p style="font-size:.85rem">'+aSpouseInfo.love+'</p>';
+  html+='<p style="margin-top:10px"><span class="hl">'+B.name+'的擇偶imprint（夫妻宮）：</span>'+(bSpouse||'無主星')+'</p>';
+  if(bSpouseInfo) html+='<p style="font-size:.85rem">'+bSpouseInfo.love+'</p>';
+
+  html+='<p style="margin-top:12px"><span class="hl">相處動態：</span>';
+  if(mingRel.type.indexOf('相生')>=0){
+    html+='雙方屬於「滋養型」關係，其中一方會自然地帶動、鼓勵另一方成長，這是很有支持感的組合，但要留意付出的一方別過度燃燒自己。';
+  } else if(mingRel.type.indexOf('相剋')>=0){
+    html+='雙方屬於「磨合型」關係，可能會有一方個性較強勢主導對方，這種組合有張力也有火花，重點在於強勢的一方要懂得適時放手，弱勢的一方要學會表達自己的需求。';
+  } else if(mingRel.type==='相同'){
+    html+='雙方屬於「同頻型」關係，個性和能量相似，容易一拍即合，但也要小心因為太像而缺乏互補，遇到衝突時容易兩敗俱傷，需要學習包容彼此的相似缺點。';
+  } else {
+    html+='雙方的能量各自獨立，不會互相牽制，這種組合需要更多主動的溝通和經營，才能建立深刻的連結，屬於「需要用心澆灌」的關係。';
+  }
+  html+='</p>';
+  html+='</div></div>';
+  return html;
+}
+
+// ── 合夥人分析 ──
+function genPartnerAnalysis(A,B,mingRel){
+  var aCareer=getMainStar(A,8); // 官祿宮
+  var bCareer=getMainStar(B,8);
+  var aWealth=getMainStar(A,4); // 財帛宮
+  var bWealth=getMainStar(B,4);
+
+  var html='<div class="sec"><div class="sec-head"><div class="sec-icon">壹</div>合夥事業分析</div><div class="sec-body">';
+  html+='<p><span class="hl">'+A.name+'的事業風格：</span>'+(aCareer?(CH_CAREER[aCareer]||'').split('。')[0]+'。':'風格獨立多變')+'</p>';
+  html+='<p style="margin-top:6px"><span class="hl">'+B.name+'的事業風格：</span>'+(bCareer?(CH_CAREER[bCareer]||'').split('。')[0]+'。':'風格獨立多變')+'</p>';
+
+  html+='<p style="margin-top:12px"><span class="hl">合作動態：</span>';
+  if(mingRel.type.indexOf('相生')>=0){
+    html+='這是一組「互補型」合夥關係，一方的強項正好能補足另一方的弱項，合作起來會有一種順水推舟的感覺，適合長期經營，建議明確劃分各自負責的領域，發揮互補優勢。';
+  } else if(mingRel.type.indexOf('相剋')>=0){
+    html+='這是一組「主導型」合夥關係，容易出現其中一方想要主導決策方向，合作前務必先講清楚股權、決策權和分工，避免日後因為主導權產生嚴重摩擦。';
+  } else if(mingRel.type==='相同'){
+    html+='雙方個性和做事風格相近，溝通上很有默契，但也可能因為想法太像而缺乏互補的火花，建議刻意找角色分工不同的第三方加入，讓團隊更完整。';
+  } else {
+    html+='雙方各自獨立運作、互不干涉，這種合夥模式適合各自負責不同區塊、財務清楚分開的合作方式，不適合需要高度默契配合的緊密合作。';
+  }
+  html+='</p>';
+  html+='<div class="tip" style="margin-top:0">合夥最重要的不是命盤合不合，而是有沒有把權責、財務、退場機制都講清楚白紙黑字寫下來，這比任何命理分析都重要。</div>';
+  html+='</div></div>';
+  return html;
+}
+
+// ── 老闆員工分析 ──
+function genBossAnalysis(A,B,mingRel){
+  var aCareer=getMainStar(A,8);
+  var bParent=getMainStar(B,11); // B的父母宮代表B與上位者的關係
+
+  var html='<div class="sec"><div class="sec-head"><div class="sec-icon">壹</div>上司與部屬關係分析</div><div class="sec-body">';
+  html+='<p><span class="hl">'+A.name+'（老闆）的管理風格（命宮）：</span>'+(getMainStar(A,0)||A.mingZhu)+'</p>';
+  html+='<p style="margin-top:6px"><span class="hl">'+B.name+'（員工）與上位者的相處傾向（父母宮）：</span>'+(bParent||'無主星')+'</p>';
+  if(bParent&&STAR_INFO[bParent]) html+='<p style="font-size:.85rem">'+(STAR_INFO[bParent].trait.split('。')[0])+'，這也會反映在'+B.name+'如何看待和回應上司的管理方式。</p>';
+
+  html+='<p style="margin-top:12px"><span class="hl">共事動態：</span>';
+  if(mingRel.type.indexOf('相剋')>=0&&mingRel.type.indexOf('A剋B')>=0){
+    html+='老闆的氣場對員工有較強的主導和約束力，員工在這段關係中容易感受到壓力，老闆宜多給予肯定和空間，避免管理過嚴讓員工失去主動性。';
+  } else if(mingRel.type.indexOf('相剋')>=0){
+    html+='員工的個性其實不輸老闆，可能會在某些事情上有自己的主見甚至隱性的對抗，老闆宜採取多溝通、給予發揮空間的管理方式，更能留住這樣的人才。';
+  } else if(mingRel.type.indexOf('相生')>=0){
+    html+='這是一組「相輔相成」的上司部屬關係，彼此的能量會自然地互相帶動，員工容易在這位老闆底下成長，也容易對公司產生認同感。';
+  } else {
+    html+='雙方的工作風格較為獨立，員工不需要太多的緊密指導就能把事情做好，老闆宜採取「充分授權」的管理方式，反而更能發揮這位員工的能力。';
+  }
+  html+='</p>';
+  html+='</div></div>';
+  return html;
+}
+
+// ── 親子分析 ──
+function genParentAnalysis(A,B,mingRel){
+  var aChild=getMainStar(A,3); // A的子女宮
+  var bParentSelf=getMainStar(B,0)||B.mingZhu; // B（子女）自己的命宮
+
+  var html='<div class="sec"><div class="sec-head"><div class="sec-icon">壹</div>親子關係深度分析</div><div class="sec-body">';
+  html+='<p><span class="hl">'+A.name+'（家長）眼中的子女緣（子女宮）：</span>'+(aChild||'無主星')+'</p>';
+  html+='<p style="margin-top:6px"><span class="hl">'+B.name+'（子女）的本命個性（命宮）：</span>'+(bParentSelf)+'</p>';
+  if(STAR_INFO[bParentSelf]) html+='<p style="font-size:.85rem">'+STAR_INFO[bParentSelf].trait+'</p>';
+
+  html+='<p style="margin-top:12px"><span class="hl">教養動態：</span>';
+  if(mingRel.type.indexOf('相剋')>=0){
+    html+='家長的教育方式和孩子天生的個性容易產生張力——家長習慣的管教風格，孩子不一定買單。這不代表關係不好，而是提醒家長：用孩子聽得懂的方式表達期待，比用權威更有效。';
+  } else if(mingRel.type.indexOf('相生')>=0){
+    html+='家長的教養方式和孩子的天性相輔相成，孩子容易在這種家庭氛圍中發展得順遂，家長的引導對孩子來說是滋養而非壓力。';
+  } else if(mingRel.type==='相同'){
+    html+='家長和孩子個性相似，這代表家長其實很懂孩子在想什麼，但也容易因為太像而互不相讓，發生衝突時，家長需要先示範退一步的態度。';
+  } else {
+    html+='家長和孩子的個性各自獨立發展，孩子可能不太容易被家長的方式影響，這種親子關係適合「多對話、少說教」的相處模式，尊重孩子走自己的路。';
+  }
+  html+='</p>';
+  html+='</div></div>';
+  return html;
+}
+
+
 
 var PAGE_DEFS=[
   {id:'p1',label:'命盤總覽'},
@@ -565,6 +806,26 @@ function goPage(id,el){
   document.querySelectorAll('.pnav-btn').forEach(function(b){b.classList.remove('on');});
   document.getElementById(id).classList.add('on');
   el.classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════════
+// 命盤比對：星曜五行對照與生剋判斷
+// ══════════════════════════════════════════════════════════
+var STAR_ELEMENT={
+  '紫微':'土','天機':'木','太陽':'火','武曲':'金','天同':'水','廉貞':'火',
+  '天府':'土','太陰':'水','貪狼':'木','巨門':'水','天相':'水','天梁':'土',
+  '七殺':'金','破軍':'水'
+};
+function checkWuxingRelation(el1, el2){
+  if(!el1||!el2) return {type:'無',desc:'能量特質難以直接比對'};
+  if(el1===el2) return {type:'相同','desc':'同氣連枝，能量相似'};
+  var sheng={木:'火',火:'土',土:'金',金:'水',水:'木'};
+  var ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
+  if(sheng[el1]===el2) return {type:'相生(A生B)',desc:'A方滋養B方，是給予帶動的關係'};
+  if(sheng[el2]===el1) return {type:'相生(B生A)',desc:'B方滋養A方，是給予帶動的關係'};
+  if(ke[el1]===el2) return {type:'相剋(A剋B)',desc:'A方對B方有較強的主導或約束力'};
+  if(ke[el2]===el1) return {type:'相剋(B剋A)',desc:'B方對A方有較強的主導或約束力'};
+  return {type:'無明顯關係',desc:'能量各自獨立，互不牽制'};
 }
 
 var STAR_INFO={
@@ -1429,9 +1690,36 @@ function genPage(id){
     var mingS16=getPalaceStars(z,z.mingGongZhi);
     var mainName16=mingS16.mains[0]||getPalaceStars(z,(z.mingGongZhi+6)%12).mains[0]||z.mingZhu;
 
+    // 找出當前大限走到哪個宮位（用來判斷「現在」是不是正走到這個主題的能量期）
+    var currentAge16=z.analYear-z.y;
+    var currentDx16=null;
+    for(var cdi=0;cdi<z.daxians.length;cdi++){
+      if(currentAge16>=z.daxians[cdi].startAge&&currentAge16<=z.daxians[cdi].endAge){ currentDx16=z.daxians[cdi]; break; }
+    }
+
+    // 四化附加語句產生器：某宮位主星若帶四化，補一段更深的命運解讀
+    function sihuaDepth(starsObj, themeWord){
+      var lines=[];
+      starsObj.mains.forEach(function(n){
+        if(z.sihua['祿']===n) lines.push('這裡還藏著「化祿」的加持——'+themeWord+'這件事，命運其實在暗中幫你鋪路，只是你可能還沒察覺這份順水推舟的力道。');
+        if(z.sihua['權']===n) lines.push('這裡還藏著「化權」的印記——在'+themeWord+'這件事上，你天生就比別人更想要主導權，這股掌控欲用對地方會是你最大的優勢。');
+        if(z.sihua['科']===n) lines.push('這裡還藏著「化科」的光——'+themeWord+'這條路上，你容易因為別人的肯定和好名聲而順勢往上走，貴人常常是被你的形象吸引來的。');
+        if(z.sihua['忌']===n) lines.push('這裡還藏著「化忌」的糾結——'+themeWord+'這件事，是你這輩子最容易卡住、也最需要花力氣突破的地方，但這關過了，反而會變成你最深的底氣。');
+      });
+      return lines.join('');
+    }
+
+    // 大限附加語句：若當前大限剛好走到這個主題對應的宮位，加一句「現在正是時候」
+    function daxianDepth(palaceIdxNum, themeWord){
+      if(currentDx16&&currentDx16.palaceIdx===palaceIdxNum){
+        return '<p style="margin-top:8px;color:var(--gold)">✦ 特別的是，你現在正走在「'+PALACE_NAMES[palaceIdxNum]+'」大限（'+currentDx16.startAge+'～'+currentDx16.endAge+'歲），這代表未來這幾年，'+themeWord+'會是你人生劇本裡最被放大的一段，命運正把聚光燈打在這裡。</p>';
+      }
+      return '';
+    }
+
     html+='<div class="sec" style="background:linear-gradient(160deg,var(--ink) 0%,#2a1a35 100%);border-color:var(--purple);">';
     html+='<div class="sec-head" style="color:var(--gold-lt)"><div class="sec-icon" style="background:var(--gold)">✦</div>人生五章：屬於你的命運劇本</div>';
-    html+='<div class="sec-body" style="color:rgba(255,255,255,.75);font-size:.82rem;line-height:1.9">這一生，命盤早已為你寫下了幾條隱藏的伏筆——關於你如何被世界看見、如何與金錢糾纏、如何背負與被愛、如何被誰真心以待，以及當你迷路時，命盤想對你說的話。</div>';
+    html+='<div class="sec-body" style="color:rgba(255,255,255,.75);font-size:.82rem;line-height:1.9">這五章不是重複前面的宮位分析，而是把主星、四化、大限走勢交織起來，說一個更完整的、關於你的故事。這一生，命盤早已為你寫下了幾條隱藏的伏筆——關於你如何被世界看見、如何與金錢糾纏、如何背負與被愛、如何被誰真心以待，以及當你迷路時，命盤想對你說的話。</div>';
     html+='</div>';
 
     // ══ 第一章：事業 ══
@@ -1441,6 +1729,9 @@ function genPage(id){
     html+='<div class="sec-body">';
     html+='<p style="font-style:italic;color:var(--mist);margin-bottom:10px">官祿宮主星：'+(careerS16.mains.length>0?careerS16.mains.join('、'):mainName16)+'</p>';
     html+='<p>'+(CH_CAREER[careerS16.mains[0]||mainName16]||'你的事業命格獨特，命盤要你透過親身經歷，才能找到真正屬於自己的位置。')+'</p>';
+    var sd1=sihuaDepth(careerS16,'事業上被看見');
+    if(sd1) html+='<p style="margin-top:8px">'+sd1+'</p>';
+    html+=daxianDepth(8,'事業和你在世界上的位置');
     html+='</div></div>';
 
     // ══ 第二章：財運 ══
@@ -1450,6 +1741,9 @@ function genPage(id){
     html+='<div class="sec-body">';
     html+='<p style="font-style:italic;color:var(--mist);margin-bottom:10px">財帛宮主星：'+(wealthS16.mains.length>0?wealthS16.mains.join('、'):mainName16)+'</p>';
     html+='<p>'+(CH_WEALTH[wealthS16.mains[0]||mainName16]||'你的財運命格獨特，命盤要你在實際的生活歷練中，慢慢摸索出屬於自己的理財之道。')+'</p>';
+    var sd2=sihuaDepth(wealthS16,'金錢和財富');
+    if(sd2) html+='<p style="margin-top:8px">'+sd2+'</p>';
+    html+=daxianDepth(4,'財富的累積與流動');
     html+='</div></div>';
 
     // ══ 第三章：親情（含道德綁架議題）══
@@ -1459,6 +1753,9 @@ function genPage(id){
     html+='<div class="sec-body">';
     html+='<p style="font-style:italic;color:var(--mist);margin-bottom:10px">父母宮主星：'+(parentS16.mains.length>0?parentS16.mains.join('、'):mainName16)+'</p>';
     html+='<p>'+(CH_FAMILY[parentS16.mains[0]||mainName16]||'你與家人的緣分獨特而深刻，命盤提醒你，愛與界線並不衝突，你可以同時做到兩者。')+'</p>';
+    var sd3=sihuaDepth(parentS16,'家庭裡的責任和情感');
+    if(sd3) html+='<p style="margin-top:8px">'+sd3+'</p>';
+    html+=daxianDepth(11,'與家人、長輩之間的課題');
     html+='<div class="tip" style="background:var(--jade-lt)">如果你經常感覺「不做就是不孝」「不順從就是自私」，這種感覺值得被好好正視。愛家人，和滿足家人所有的期待，從來就不是同一件事。</div>';
     html+='</div></div>';
 
@@ -1469,6 +1766,9 @@ function genPage(id){
     html+='<div class="sec-body">';
     html+='<p style="font-style:italic;color:var(--mist);margin-bottom:10px">交友宮主星：'+(friendS16.mains.length>0?friendS16.mains.join('、'):mainName16)+'</p>';
     html+='<p>'+(CH_FRIEND[friendS16.mains[0]||mainName16]||'你的友情命格獨特，命盤提醒你，時間會替你篩選出真正值得的人。')+'</p>';
+    var sd4=sihuaDepth(friendS16,'人際關係和友情');
+    if(sd4) html+='<p style="margin-top:8px">'+sd4+'</p>';
+    html+=daxianDepth(7,'你身邊的人和交友圈');
     html+='</div></div>';
 
     // ══ 第五章：人生方向（迷惘時的指引，非危機介入）══
@@ -1478,6 +1778,9 @@ function genPage(id){
     html+='<div class="sec-body">';
     html+='<p style="font-style:italic;color:var(--mist);margin-bottom:10px">福德宮主星：'+(fudeS16.mains.length>0?fudeS16.mains.join('、'):mainName16)+'</p>';
     html+='<p>'+(CH_DIRECTION[fudeS16.mains[0]||mainName16]||'你此刻的迷惘，命盤想提醒你，這只是人生眾多篇章裡的一個轉折，不是終點。')+'</p>';
+    var sd5=sihuaDepth(fudeS16,'內心的安定與方向感');
+    if(sd5) html+='<p style="margin-top:8px">'+sd5+'</p>';
+    html+=daxianDepth(10,'你的內在心境與人生方向');
     html+='<div class="tip" style="background:#fff0ee;border-left-color:var(--rust)">如果你或身邊的人正被強烈的痛苦或想放棄自己的念頭困擾著，命盤能給的只是陪伴和方向感，真正能幫上忙的是專業的協助。台灣「安心專線 1925」、「張老師專線 1980」24小時都有人接聽，願意聽你說，不用一個人扛。</div>';
     html+='</div></div>';
 
@@ -1577,6 +1880,7 @@ function goNav(view, el){
   el.style.color='var(--gold)';
   el.style.borderBottomColor='var(--gold)';
   document.getElementById('analyze-view').style.display = view==='analyze' ? '' : 'none';
+  document.getElementById('compare-view').style.display = view==='compare' ? '' : 'none';
   document.getElementById('crm-view').style.display = view==='crm' ? '' : 'none';
   if(view==='crm') renderClients();
 }
